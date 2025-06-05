@@ -31,7 +31,7 @@ class AuthMiddleware
 
     private static function unauthorized(string $message)
     {
-        Response::json(['message' => $message], 401);
+        Response::json(['error' => $message], 401);
         exit;
     }
 }

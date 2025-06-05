@@ -1,56 +1,39 @@
 import './App.css'
-import '@mantine/core/styles.css';
-import { MantineProvider } from '@mantine/core';
-import { Button, Checkbox, Group, TextInput } from '@mantine/core';
-import { useForm } from '@mantine/form';
-import FullCalendar from '@fullcalendar/react';
-import dayGridPlugin from '@fullcalendar/daygrid';
+import {
+    Route,
+    createBrowserRouter,
+    createRoutesFromElements,
+    RouterProvider, Navigate
+} from 'react-router-dom';
+import RootLayout from "./routes/RootLayout.jsx";
+import NotFound from "./pages/NotFound.jsx";
+import LoginPage from "./pages/LoginPage.jsx";
+import RegisterPage from "./pages/RegisterPage.jsx";
+import HomePage from "./pages/HomePage.jsx";
+import RequireAuth from "./routes/RequireAuth.jsx";
 
 function App() {
-    const form = useForm({
-        mode: 'uncontrolled',
-        initialValues: {
-            email: '',
-            termsOfService: false,
-        },
+    const router = createBrowserRouter(
+        createRoutesFromElements(
+            <Route path="/">
+                <Route element={<RequireAuth/>}>
+                    <Route path="home" index element={<HomePage/>}/>
+                </Route>
 
-        validate: {
-            email: (value) => (/^\S+@\S+$/.test(value) ? null : 'Invalid email'),
-        },
-    });
+                <Route path="/" element={<Navigate to="/home" replace/>}/>
+                <Route path="login" element={<LoginPage/>}/>
+                <Route path="register" element={<RegisterPage/>}/>
 
-  return (
-      <MantineProvider>
-          <form onSubmit={form.onSubmit((values) => console.log(values))}>
-              <TextInput
-                  withAsterisk
-                  label="Email"
-                  placeholder="your@email.com"
-                  key={form.key('email')}
-                  {...form.getInputProps('email')}
-              />
+                <Route path="*" element={<NotFound/>}/>
+            </Route>
+        )
+    );
 
-              <Checkbox
-                  mt="md"
-                  label="I agree to sell my privacy"
-                  key={form.key('termsOfService')}
-                  {...form.getInputProps('termsOfService', {type: 'checkbox'})}
-              />
-
-              <Group justify="flex-end" mt="md">
-                  <Button type="submit">Submit</Button>
-              </Group>
-          </form>
-          <FullCalendar
-              plugins={[dayGridPlugin]}
-              initialView="dayGridMonth"
-              events={[
-                  { title: 'Подія 1', date: '2025-06-01' },
-                  { title: 'Подія 2', date: '2025-06-02' },
-              ]}
-          />
-      </MantineProvider>
-  )
+    return (
+        <div className="App">
+            <RouterProvider router={router}/>
+        </div>
+    )
 }
 
 export default App

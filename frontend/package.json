@@ -26,6 +26,7 @@
     "@mantine/spotlight": "^8.0.2",
     "@mantine/tiptap": "^8.0.2",
     "@reduxjs/toolkit": "^2.8.2",
+    "@tabler/icons-react": "^3.34.0",
     "@tailwindcss/vite": "^4.1.8",
     "@tiptap/extension-link": "^2.13.0",
     "@tiptap/pm": "^2.13.0",
@@ -37,6 +38,7 @@
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-redux": "^9.2.0",
+    "react-router-dom": "^7.6.2",
     "recharts": "^2.15.3",
     "tailwindcss": "^4.1.8"
   },

@@ -56,14 +56,14 @@ class AuthController extends Controller
         $password = $data['password'] ?? '';
 
         if (!$email || !$password) {
-            return $this->json(['error' => 'Email and password required'], 422);
+            return $this->json(['message' => 'Email and password required'], 422);
         }
 
         $userModel = new UserModel();
         $user = $userModel->findByEmail($email);
 
         if (!$user || !password_verify($password . $user['salt'], $user['password'])) {
-            return $this->json(['error' => 'Incorrect email or password'], 401);
+            return $this->json(['message' => 'Incorrect email or password'], 401);
         }
 
         return $this->json($this->generateTokensAndSave($user['id']));
@@ -96,8 +96,8 @@ class AuthController extends Controller
         return $this->json([
             'access' => [
                 'token' => $accessToken,
-                'expiresAt' => date('Y-m-d H:i:s', time() + TokenHelper::ACCESS_TTL),
-            ]
+                'expiresAt' => (time() + TokenHelper::ACCESS_TTL) * 1000,
+                ]
         ]);
     }
 
@@ -122,22 +122,24 @@ class AuthController extends Controller
         $refreshToken = TokenHelper::generateRefreshToken();
         $refreshHash = TokenHelper::hashRefreshToken($refreshToken);
 
+        $refreshExpiresAt = time() + TokenHelper::REFRESH_TTL;
+
         (new UserRefreshToken())->create([
             'user_id' => $userId,
             'refresh_token_hash' => $refreshHash,
-            'expires_at' => date('Y-m-d H:i:s', time() + TokenHelper::REFRESH_TTL),
+            'expires_at' => date('Y-m-d H:i:s', $refreshExpiresAt),
             'device_info' => $_SERVER['HTTP_USER_AGENT'] ?? null
         ]);
 
         return [
             'access' => [
                 'token' => $accessToken,
-                'expiresAt' => date('Y-m-d H:i:s', time() + TokenHelper::ACCESS_TTL),
-            ],
+                'expiresAt' => (time() + TokenHelper::ACCESS_TTL) * 1000,
+                ],
             'refresh' => [
                 'token' => $refreshToken,
-                'expiresAt' => date('Y-m-d H:i:s', time() + TokenHelper::REFRESH_TTL),
-            ]
+                'expiresAt' => $refreshExpiresAt * 1000,
+                ]
         ];
     }
 }
