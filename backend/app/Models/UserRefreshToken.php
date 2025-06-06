@@ -32,4 +32,11 @@ class UserRefreshToken extends Model
             ->where('refresh_token_hash', '=', $hash)
             ->first();
     }
+
+    public function findByDevice(string $device_info): ?array
+    {
+        return $this->query()
+            ->where('device_info', '=', $device_info)
+            ->first();
+    }
 }

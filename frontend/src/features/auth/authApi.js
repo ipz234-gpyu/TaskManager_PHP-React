@@ -1,5 +1,5 @@
 import { createApi } from '@reduxjs/toolkit/query/react';
-import { setTokens, setAccessToken, logout } from './authSlice';
+import { setTokens, setAccessToken, logout, setUser } from './authSlice';
 import { getCookie } from '../../utils/cookieHandlers';
 import { baseQueryWithReauth } from './../baseApi';
 
@@ -21,6 +21,8 @@ export const authApi = createApi({
                         access: data.data.access,
                         refresh: data.data.refresh
                     }));
+
+                    dispatch(setUser(data.data.user));
                 } catch {
                 }
             },
@@ -39,6 +41,8 @@ export const authApi = createApi({
                         access: data.data.access,
                         refresh: data.data.refresh
                     }));
+
+                    dispatch(setUser(data.data.user));
                 } catch {
                 }
             },
@@ -64,7 +68,7 @@ export const authApi = createApi({
             query: () => ({
                 url: '/auth/logout',
                 method: 'POST',
-                body: getCookie('refreshToken'),
+                body: JSON.stringify({ refreshToken: getCookie('refreshToken') }),
             }),
             async onQueryStarted(_, {dispatch, queryFulfilled}) {
                 try {

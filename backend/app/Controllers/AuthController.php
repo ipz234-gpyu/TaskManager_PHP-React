@@ -97,14 +97,14 @@ class AuthController extends Controller
             'access' => [
                 'token' => $accessToken,
                 'expiresAt' => (time() + TokenHelper::ACCESS_TTL) * 1000,
-                ]
+            ]
         ]);
     }
 
     public function actionLogout()
     {
         $data = Request::json();
-        $refreshToken = $data['refresh_token'] ?? '';
+        $refreshToken = $data['refreshToken'] ?? '';
 
         if (!$refreshToken) {
             return $this->json(['message' => 'Refresh token is required'], 422);
@@ -119,27 +119,46 @@ class AuthController extends Controller
     protected function generateTokensAndSave(string $userId): array
     {
         $accessToken = TokenHelper::generateAccessToken(['id' => $userId]);
+        $deviceInfo = $_SERVER['HTTP_USER_AGENT'] ?? null;
+
         $refreshToken = TokenHelper::generateRefreshToken();
         $refreshHash = TokenHelper::hashRefreshToken($refreshToken);
-
         $refreshExpiresAt = time() + TokenHelper::REFRESH_TTL;
 
-        (new UserRefreshToken())->create([
-            'user_id' => $userId,
-            'refresh_token_hash' => $refreshHash,
-            'expires_at' => date('Y-m-d H:i:s', $refreshExpiresAt),
-            'device_info' => $_SERVER['HTTP_USER_AGENT'] ?? null
-        ]);
+        $model = new UserRefreshToken();
+        $existing = $model->findByDevice($deviceInfo);
+
+        if ($existing) {
+            $model->where('id', '=', $existing['id'])->update([
+                'refresh_token_hash' => $refreshHash,
+                'expires_at' => date('Y-m-d H:i:s', $refreshExpiresAt),
+            ]);
+        } else {
+            $model->create([
+                'user_id' => $userId,
+                'refresh_token_hash' => $refreshHash,
+                'expires_at' => date('Y-m-d H:i:s', $refreshExpiresAt),
+                'device_info' => $deviceInfo
+            ]);
+        }
+
+        $user = (new UserModel())->where('id', '=', $userId)->first();
 
         return [
             'access' => [
                 'token' => $accessToken,
                 'expiresAt' => (time() + TokenHelper::ACCESS_TTL) * 1000,
-                ],
+            ],
             'refresh' => [
                 'token' => $refreshToken,
                 'expiresAt' => $refreshExpiresAt * 1000,
-                ]
+            ],
+            'user' => [
+                'id' => $user['id'],
+                'name' => $user['name'],
+                'surname' => $user['surname'],
+                'email' => $user['email']
+            ]
         ];
     }
 }
