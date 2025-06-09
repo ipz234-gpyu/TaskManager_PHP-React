@@ -6,6 +6,7 @@ abstract class Model
 {
     protected string $table;
     protected array $attributes = [];
+    protected string $alias = '';
 
     public function __construct()
     {
@@ -17,7 +18,7 @@ abstract class Model
 
     public function query(): QueryBuilder
     {
-        return new QueryBuilder($this->table);
+        return new QueryBuilder($this->table, $this->alias);
     }
 
     public function fill(array $data): self

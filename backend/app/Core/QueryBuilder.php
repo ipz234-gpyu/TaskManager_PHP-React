@@ -8,16 +8,38 @@ class QueryBuilder
 {
     protected PDO $pdo;
     protected string $table;
+    protected string $alias = '';
     protected array $select = ['*'];
     protected array $where = [];
     protected array $bindings = [];
     protected ?string $orderBy = null;
     protected ?int $limit = null;
+    protected array $joins = [];
+    protected array $groupBy = [];
 
-    public function __construct(string $table)
+    public function __construct(string $table, string $alias = '')
     {
         $this->pdo = Database::get()->pdo();
         $this->table = $table;
+        $this->alias = $alias;
+    }
+
+    public function join(string $table, string $on): self
+    {
+        $this->joins[] = "JOIN $table ON $on";
+        return $this;
+    }
+
+    public function leftJoin(string $table, string $on): self
+    {
+        $this->joins[] = "LEFT JOIN $table ON $on";
+        return $this;
+    }
+
+    public function groupBy(string ...$columns): self
+    {
+        $this->groupBy = $columns;
+        return $this;
     }
 
     public function select(array $columns): self
@@ -48,8 +70,19 @@ class QueryBuilder
     public function get(): array
     {
         $sql = 'SELECT ' . implode(', ', $this->select) . ' FROM ' . $this->table;
+
+        if ($this->alias) {
+            $sql .= ' ' . $this->alias;
+        }
+
+        if (!empty($this->joins)) {
+            $sql .= ' ' . implode(' ', $this->joins);
+        }
         if (!empty($this->where)) {
             $sql .= ' WHERE ' . implode(' AND ', $this->where);
+        }
+        if (!empty($this->groupBy)) {
+            $sql .= ' GROUP BY ' . implode(', ', $this->groupBy);
         }
         if ($this->orderBy) {
             $sql .= ' ORDER BY ' . $this->orderBy;

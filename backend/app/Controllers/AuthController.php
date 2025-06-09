@@ -92,11 +92,18 @@ class AuthController extends Controller
         }
 
         $accessToken = TokenHelper::generateAccessToken(['id' => $record['user_id']]);
+        $user = (new UserModel())->where('id', '=', $record['user_id'])->first();
 
         return $this->json([
             'access' => [
                 'token' => $accessToken,
                 'expiresAt' => (time() + TokenHelper::ACCESS_TTL) * 1000,
+            ],
+            'user' => [
+                'id' => $user['id'],
+                'name' => $user['name'],
+                'surname' => $user['surname'],
+                'email' => $user['email']
             ]
         ]);
     }

@@ -60,6 +60,8 @@ export const authApi = createApi({
                     dispatch(setAccessToken({
                         access: data.data.access,
                     }));
+
+                    dispatch(setUser(data.data.user));
                 } catch {
                 }
             },

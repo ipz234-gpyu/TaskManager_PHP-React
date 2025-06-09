@@ -19,7 +19,7 @@ export const baseQuery = fetchBaseQuery({
 export const baseQueryWithReauth = async (args, api, extraOptions) => {
     let result = await baseQuery(args, api, extraOptions);
 
-    if (result?.error?.status === 401 && result?.error?.data?.data?.message === "INVALID_TOKEN") {
+    if (result?.error?.status === 401) {
         const refreshToken = getCookie('refreshToken');
 
         if (refreshToken) {
@@ -35,8 +35,6 @@ export const baseQueryWithReauth = async (args, api, extraOptions) => {
             } else {
                 api.dispatch(logout());
             }
-
-            result = await baseQuery(args, api, extraOptions);
         } else {
             api.dispatch(logout());
         }

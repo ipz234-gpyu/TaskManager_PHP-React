@@ -5,22 +5,44 @@ import {
     createRoutesFromElements,
     RouterProvider, Navigate
 } from 'react-router-dom';
+import { MantineProvider } from '@mantine/core';
+import { createTodoTheme } from "./utils/theme.js"
+
 import RootLayout from "./routes/RootLayout.jsx";
+import RequireAuth from "./routes/RequireAuth.jsx";
+
 import NotFound from "./pages/NotFound.jsx";
 import LoginPage from "./pages/LoginPage.jsx";
 import RegisterPage from "./pages/RegisterPage.jsx";
 import HomePage from "./pages/HomePage.jsx";
-import RequireAuth from "./routes/RequireAuth.jsx";
+import TodayDashboard from "./pages/dashboards/TodayDashboard.jsx";
+import UpcomingDashboard from "./pages/dashboards/UpcomingDashboard.jsx";
+import CustomDashboard from "./pages/CustomDashboard.jsx";
+import ImportantDashboard from "./pages/dashboards/ImportantDashboard.jsx";
+//import SettingsPage from "./pages/SettingsPage.jsx";
 
 function App() {
     const router = createBrowserRouter(
         createRoutesFromElements(
             <Route path="/">
-                <Route element={<RequireAuth/>}>
-                    <Route path="home" index element={<HomePage/>}/>
+                <Route index element={<Navigate to="home" replace/>}/>
+
+                    <Route element={<RequireAuth/>}>
+                        <Route element={<RootLayout/>}>
+                        <Route path="dashboard">
+                            <Route path="today" element={<TodayDashboard/>}/>
+                            <Route path="upcoming" element={<UpcomingDashboard/>}/>
+                            <Route path="important" element={<ImportantDashboard />} />
+                            <Route path="custom/:dashboardId" element={<CustomDashboard/>}/>
+                            <Route path="team/:teamId/:dashboardId" element={<CustomDashboard/>}/>
+                        </Route>
+                        {/*
+                        <Route path="settings" element={<SettingsPage />} />
+                        */}
+                        <Route path="home" element={<HomePage/>}/>
+                    </Route>
                 </Route>
 
-                <Route path="/" element={<Navigate to="/home" replace/>}/>
                 <Route path="login" element={<LoginPage/>}/>
                 <Route path="register" element={<RegisterPage/>}/>
 
@@ -31,7 +53,9 @@ function App() {
 
     return (
         <div className="App">
-            <RouterProvider router={router}/>
+            <MantineProvider theme={createTodoTheme('dark')} defaultColorScheme="dark">
+                <RouterProvider router={router}/>
+            </MantineProvider>
         </div>
     )
 }
