@@ -12,6 +12,7 @@ import {
     removeDashboardFromTeam,
     updateTeamDashboard,
 } from './dashboardsSlice.js';
+import { setCustomDashboard } from '../customDashboard/customDashboardSlice.js'
 import { baseQueryWithReauth } from './../baseApi';
 
 export const dashboardsApi = createApi({
@@ -65,10 +66,14 @@ export const dashboardsApi = createApi({
                 method: 'PUT',
                 body: JSON.stringify(credentials)
             }),
-            async onQueryStarted(_, {dispatch, queryFulfilled}) {
+            async onQueryStarted(_, {dispatch, queryFulfilled, getState}) {
                 try {
                     const {data} = await queryFulfilled;
                     dispatch(updateCustomDashboard(data.data.dashboard));
+
+                    if (data.data.dashboard.id === getState().dashboards.activeTab) {
+                        dispatch(setCustomDashboard(data.data.dashboard))
+                    }
                 } catch {
                 }
             },

@@ -7,11 +7,12 @@ import {
     dashboardsApi,
     useAddCustomDashboardMutation,
     useDeleteCustomDashboardsMutation,
-    useUpdateCustomDashboardMutation
+    useUpdateCustomDashboardMutation,
 } from "../features/dashboards/dashboardsApi.js";
 import { useDisclosure } from "@mantine/hooks";
 import { useForm } from "@mantine/form";
 import { useNavigate } from "react-router-dom";
+import { setActiveTab } from "../features/dashboards/dashboardsSlice.js";
 
 export default function CustomDashboard({setError}) {
     const dispatch = useDispatch();
@@ -59,6 +60,7 @@ export default function CustomDashboard({setError}) {
         closeDelete();
         if (activeTab === dashboardToDelete) {
             navigate('/dashboard/today');
+            dispatch(setActiveTab('today'))
         }
     };
 

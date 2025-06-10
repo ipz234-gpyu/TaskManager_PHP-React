@@ -13,7 +13,6 @@ class GroupFromUserModel extends Model
     {
         return $this->query()->insert($data);
     }
-
     public function findById(string $id): ?array
     {
         return $this->query()
@@ -28,8 +27,6 @@ class GroupFromUserModel extends Model
             ->groupBy('g.id', 'g.name', 'g.priority', 'g.user_id')
             ->first();
     }
-
-
     public function findAllByUserId(string $userId): array
     {
         return $this->query()
@@ -45,14 +42,33 @@ class GroupFromUserModel extends Model
             ->orderBy('g.priority')
             ->get();
     }
-
     public function updateById(string $id, array $data): bool
     {
         return $this->query()->where('id', '=', $id)->update($data);
     }
-
     public function deleteById(string $id): bool
     {
-        return $this->query()->where('id','=', $id)->delete();
+        $groupListModel = new GroupListFromUserModel();
+        $groupLists = $groupListModel->findByGroupId($id);
+        $listIds = array_column($groupLists, 'list_id');
+
+        if (!empty($listIds)) {
+            $listModel = new ListModel();
+            foreach ($listIds as $listId) {
+                $listModel->deleteById($listId);
+            }
+        }
+
+        $groupListModel->deleteByGroupId($id);
+
+        return $this->query()->where('id', '=', $id)->delete();
+    }
+    public function deleteByUserId(string $userId): bool
+    {
+        $groups = $this->query()->select(['id'])->where('user_id', '=', $userId)->get();
+        foreach ($groups as $group) {
+            $this->deleteById($group['id']);
+        }
+        return true;
     }
 }

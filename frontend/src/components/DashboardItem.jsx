@@ -24,47 +24,53 @@ export const DashboardItem = ({
     const navigate = useNavigate();
     const dispatch = useDispatch();
 
+    const handleClick = () => {
+        navigate(`/${url}`);
+        dispatch(setActiveTab(dashboard.id));
+    };
+
     return (
-        <NavLink
-            label={
-                <Group justify="space-between">
-                    <Group gap="sm">
-                        {IconComponent && <IconComponent size={18}/>}
-                        <Text size="sm">{dashboard.name}</Text>
-                    </Group>
-                    <Group gap="xs">
+        <Group gap={1} justify="space-between" align="center">
+            <NavLink
+                label={
+                    <Group justify="space-between" gap="sm">
+                        <Group>
+                            {IconComponent && <IconComponent size={18}/>}
+                            <Text size="sm" lineClamp={1}>{dashboard.name}</Text>
+                        </Group>
                         {dashboard?.count > 0 && (
                             <Badge size="sm" variant="light" color="blue">
                                 {dashboard.count}
                             </Badge>
                         )}
-                        {showActions && (
-                            <Group gap={2}>
-                                <ActionIcon
-                                    size="xs"
-                                    variant="subtle"
-                                    onClick={() => handleEditClick(dashboard)}
-                                >
-                                    <IconEdit size={16}/>
-                                </ActionIcon>
-                                <ActionIcon
-                                    size="xs"
-                                    variant="subtle"
-                                    color="red"
-                                    onClick={() => handleDeleteClick(dashboard)}
-                                >
-                                    <IconTrash size={16}/>
-                                </ActionIcon>
-                            </Group>
-                        )}
                     </Group>
+                }
+                active={isActive}
+                onClick={handleClick}
+                style={{flex: 1}}
+            />
+
+            {showActions && (
+                <Group gap={1} align="center">
+                        <ActionIcon
+                            size="md"
+                            variant="subtle"
+                            radius="lg"
+                            onClick={() => handleEditClick(dashboard)}
+                        >
+                            <IconEdit size={18}/>
+                        </ActionIcon>
+                        <ActionIcon
+                            size="md"
+                            variant="subtle"
+                            color="red"
+                            radius="lg"
+                            onClick={() => handleDeleteClick(dashboard)}
+                        >
+                            <IconTrash size={18}/>
+                        </ActionIcon>
                 </Group>
-            }
-            active={isActive}
-            onClick={() => {
-                navigate(`/${url}`);
-                dispatch(setActiveTab(dashboard.id));
-            }}
-        />
+            )}
+        </Group>
     );
 };

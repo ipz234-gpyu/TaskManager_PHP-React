@@ -72,6 +72,43 @@ export const darkTheme = createTheme({
     },
 
     components: {
+        DateTimePicker: {
+            styles: (theme) => ({
+                input: {
+                    backgroundColor: theme.colors.dark[7],
+                    borderColor: theme.colors.dark[5],
+                    color: theme.colors.dark[0],
+                    '&:focus': {
+                        borderColor: theme.colors.blue[6],
+                    },
+                },
+                dropdown: {
+                    backgroundColor: theme.colors.dark[6],
+                    borderColor: theme.colors.dark[5],
+                    zIndex: 1000, // гарантує поверх всього
+                },
+                day: {
+                    color: theme.colors.dark[0],
+                    '&[data-selected]': {
+                        backgroundColor: theme.colors.blue[6],
+                        color: theme.white,
+                    },
+                    '&[data-outside]': {
+                        color: theme.colors.dark[4],
+                    },
+                    '&:hover': {
+                        backgroundColor: theme.colors.dark[5],
+                    },
+                },
+                timeInput: {
+                    backgroundColor: theme.colors.dark[7],
+                    borderColor: theme.colors.dark[5],
+                    color: theme.colors.dark[0],
+                },
+            }),
+        },
+
+
         AppShell: {
             styles: (theme) => ({
                 main: {

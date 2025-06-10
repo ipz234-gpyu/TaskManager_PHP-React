@@ -19,32 +19,34 @@ export default function AccordionControl({text, addAction, deleteAction, editAct
             </Accordion.Control>
             {addAction &&
                 <ActionIcon
-                    mr={10}
                     size="md"
                     variant="subtle"
+                    radius="lg"
+                    color="green"
                     onClick={() => addAction()}
                 >
-                    <IconPlus size={16}/>
+                    <IconPlus size={18}/>
                 </ActionIcon>
             }
             {editAction &&
                 <ActionIcon
-                    mr={10}
                     size="md"
                     variant="subtle"
+                    radius="lg"
                     onClick={() => editAction()}
                 >
-                    <IconEdit size={16}/>
+                    <IconEdit size={18}/>
                 </ActionIcon>
             }
             {deleteAction &&
                 <ActionIcon
-                    mr={10}
                     size="md"
                     variant="subtle"
+                    radius="lg"
+                    color="red"
                     onClick={() => deleteAction()}
                 >
-                    <IconTrash size={16}/>
+                    <IconTrash size={18}/>
                 </ActionIcon>
             }
         </Center>

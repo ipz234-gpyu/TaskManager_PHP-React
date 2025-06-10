@@ -27,7 +27,7 @@ export default function AccordionPanelDB({dashboards, urldb, addAction, isLoadin
                         variant="light"
                         size="xs"
                         fullWidth
-                        leftSection={<IconPlus size={16} />}
+                        leftSection={<IconPlus size={18} />}
                         onClick={addAction}
                         mt="sm"
                     >

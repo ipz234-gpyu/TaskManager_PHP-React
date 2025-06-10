@@ -41,7 +41,7 @@ function DashboardTabs() {
     return (
         <ScrollArea className="flex-1 px-3">
             <Stack gap="md" className="py-4">
-                <Group gap="xs">
+                <Stack gap="xs">
                     {defaultDashboards.map((dashboard) => (
                         <DashboardItem
                             IconComponent={dashboard.icon}
@@ -49,7 +49,7 @@ function DashboardTabs() {
                             key={dashboard.id}
                             dashboard={dashboard}/>
                     ))}
-                </Group>
+                </Stack>
 
                 <Divider color="dark.4"/>
                 <CustomDashboard setError={setError}/>

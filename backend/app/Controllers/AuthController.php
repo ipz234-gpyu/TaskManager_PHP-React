@@ -6,7 +6,7 @@ use App\Core\Controller;
 use App\Core\Request;
 use App\Helpers\TokenHelper;
 use App\Models\UserModel;
-use App\Models\UserRefreshToken;
+use App\Models\UserRefreshTokenModel;
 use Ramsey\Uuid\Uuid;
 
 class AuthController extends Controller
@@ -79,7 +79,7 @@ class AuthController extends Controller
         }
 
         $hash = TokenHelper::hashRefreshToken($refreshToken);
-        $model = new UserRefreshToken();
+        $model = new UserRefreshTokenModel();
         $record = $model->findByTokenHash($hash);
 
         if (!$record) {
@@ -118,7 +118,7 @@ class AuthController extends Controller
         }
 
         $hash = TokenHelper::hashRefreshToken($refreshToken);
-        (new UserRefreshToken())->deleteByTokenHash($hash);
+        (new UserRefreshTokenModel())->deleteByTokenHash($hash);
 
         return $this->json();
     }
@@ -132,7 +132,7 @@ class AuthController extends Controller
         $refreshHash = TokenHelper::hashRefreshToken($refreshToken);
         $refreshExpiresAt = time() + TokenHelper::REFRESH_TTL;
 
-        $model = new UserRefreshToken();
+        $model = new UserRefreshTokenModel();
         $existing = $model->findByDevice($deviceInfo);
 
         if ($existing) {

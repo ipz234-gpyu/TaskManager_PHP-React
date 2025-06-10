@@ -5,6 +5,7 @@ import {
     createRoutesFromElements,
     RouterProvider, Navigate
 } from 'react-router-dom';
+import '@mantine/dates/styles.css';
 import { MantineProvider } from '@mantine/core';
 import { createTodoTheme } from "./utils/theme.js"
 
@@ -32,7 +33,8 @@ function App() {
                         <Route path="dashboard">
                             <Route path="today" element={<TodayDashboard/>}/>
                             <Route path="upcoming" element={<UpcomingDashboard/>}/>
-                            <Route path="important" element={<ImportantDashboard />} />
+                            <Route path="important" element={<ImportantDashboard />}/>
+
                             <Route path="custom/:dashboardId" element={<CustomDashboard/>}/>
                             <Route path="team/:teamId/:dashboardId" element={<CustomDashboard/>}/>
                         </Route>
