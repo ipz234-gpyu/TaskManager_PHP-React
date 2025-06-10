@@ -24,6 +24,12 @@ class QueryBuilder
         $this->alias = $alias;
     }
 
+    public function alias(string $alias): self
+    {
+        $this->alias = $alias;
+        return $this;
+    }
+
     public function join(string $table, string $on): self
     {
         $this->joins[] = "JOIN $table ON $on";

@@ -7,8 +7,9 @@ import {
     Text
 } from "@mantine/core";
 import React from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import { setActiveTab } from "../features/dashboards/dashboardsSlice.js";
 
 export const DashboardItem = ({
                                   IconComponent,
@@ -21,13 +22,14 @@ export const DashboardItem = ({
     const activeTab = useSelector((state) => state.dashboards.activeTab);
     const isActive = activeTab === dashboard.id;
     const navigate = useNavigate();
+    const dispatch = useDispatch();
 
     return (
         <NavLink
             label={
                 <Group justify="space-between">
                     <Group gap="sm">
-                        {IconComponent && <IconComponent size={18} />}
+                        {IconComponent && <IconComponent size={18}/>}
                         <Text size="sm">{dashboard.name}</Text>
                     </Group>
                     <Group gap="xs">
@@ -43,7 +45,7 @@ export const DashboardItem = ({
                                     variant="subtle"
                                     onClick={() => handleEditClick(dashboard)}
                                 >
-                                    <IconEdit size={16} />
+                                    <IconEdit size={16}/>
                                 </ActionIcon>
                                 <ActionIcon
                                     size="xs"
@@ -51,7 +53,7 @@ export const DashboardItem = ({
                                     color="red"
                                     onClick={() => handleDeleteClick(dashboard)}
                                 >
-                                    <IconTrash size={16} />
+                                    <IconTrash size={16}/>
                                 </ActionIcon>
                             </Group>
                         )}
@@ -59,7 +61,10 @@ export const DashboardItem = ({
                 </Group>
             }
             active={isActive}
-            onClick={() => navigate(`/${url}`)}
+            onClick={() => {
+                navigate(`/${url}`);
+                dispatch(setActiveTab(dashboard.id));
+            }}
         />
     );
 };

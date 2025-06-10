@@ -3,10 +3,10 @@ import {
     Center,
     Accordion, Text, Group
 } from '@mantine/core';
-import { IconPlus, IconTrash } from '@tabler/icons-react';
+import { IconPlus, IconTrash, IconEdit } from '@tabler/icons-react';
 import React from "react";
 
-export default function AccordionControl({text, addAction, deleteAction}) {
+export default function AccordionControl({text, addAction, deleteAction, editAction}) {
     return (
         <Center>
             <Accordion.Control>
@@ -25,6 +25,16 @@ export default function AccordionControl({text, addAction, deleteAction}) {
                     onClick={() => addAction()}
                 >
                     <IconPlus size={16}/>
+                </ActionIcon>
+            }
+            {editAction &&
+                <ActionIcon
+                    mr={10}
+                    size="md"
+                    variant="subtle"
+                    onClick={() => editAction()}
+                >
+                    <IconEdit size={16}/>
                 </ActionIcon>
             }
             {deleteAction &&

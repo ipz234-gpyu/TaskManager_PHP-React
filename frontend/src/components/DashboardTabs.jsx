@@ -1,13 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
     ScrollArea,
     Divider,
     Group,
     Stack,
-    Accordion,
-    Modal,
-    Button,
-    TextInput,
 } from '@mantine/core';
 import {
     IconCalendar,
@@ -15,15 +11,11 @@ import {
     IconStar,
 } from '@tabler/icons-react';
 
-import { useDispatch, useSelector } from 'react-redux'
 import { DashboardItem } from './DashboardItem.jsx';
-import AccordionControl from './AccordionControl.jsx'
-import AccordionPanelDB from "./AccordionPanelDB.jsx";
 import CustomDashboard from "./CustomDashboard.jsx";
+import TeamDashboard from "./TeamDashboard.jsx";
 
 function DashboardTabs() {
-    const dispatch = useDispatch();
-    const teams = useSelector((state) => state.dashboards.teams);
     const defaultDashboards = [
         {
             id: 'today',
@@ -44,11 +36,7 @@ function DashboardTabs() {
             count: 3
         },
     ];
-    const [isErrorAdd, setError] = useState(false);
-
-    const click = () => {
-        alert("Not GAY");
-    }
+    const [error, setError] = useState('');
 
     return (
         <ScrollArea className="flex-1 px-3">
@@ -64,45 +52,9 @@ function DashboardTabs() {
                 </Group>
 
                 <Divider color="dark.4"/>
-
                 <CustomDashboard setError={setError}/>
-
                 <Divider color="dark.4"/>
-
-                <Accordion
-                    variant="contained"
-                    chevronPosition="right"
-                    multiple
-                >
-                    <Accordion.Item value="teams-header">
-                        <AccordionControl
-                            text='TEAMS'
-                            //addAction={addTeamHandle}
-                        />
-
-                        <Accordion.Panel>
-                        <Accordion
-                                multiple
-                            >
-                                {teams?.map((team) => (
-                                    <Accordion.Item value={`team-${team.id}`} key={team.id}>
-                                        <AccordionControl
-                                            text={team.name}
-                                            addAction={click}
-                                            deleteAction={team.isAdmin ?? click}
-                                        />
-
-                                        <AccordionPanelDB
-                                            dashboards={team.dashboards}
-                                            urldb={`team/${team.id}`}
-                                            addAction={click}
-                                        />
-                                    </Accordion.Item>
-                                ))}
-                            </Accordion>
-                        </Accordion.Panel>
-                    </Accordion.Item>
-                </Accordion>
+                <TeamDashboard setError={setError}/>
             </Stack>
         </ScrollArea>
     );
