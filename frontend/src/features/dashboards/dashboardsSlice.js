@@ -57,9 +57,13 @@ const dashboardsSlice = createSlice({
             }
         },
         updateTeamDashboard: (state, action) => {
-            const { teamId, dashboard } = action.payload;
-            const team = state.teams.find(t => t.id === teamId);
-            if (team && team.dashboards) {
+            const dashboard = action.payload;
+
+            const team = state.teams.find(t =>
+                t.dashboards?.some(d => d.id === dashboard.id)
+            );
+
+            if (team) {
                 team.dashboards = team.dashboards.map(d =>
                     d.id === dashboard.id ? dashboard : d
                 );

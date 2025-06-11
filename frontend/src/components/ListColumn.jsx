@@ -24,6 +24,9 @@ export default function ListColumn({
                                        onError,
                                        handleEditClick,
                                        handleDeleteClick,
+                                       onTaskStatusToggle,
+                                       onTaskDelete,
+                                       onTaskUpdate,
                                    }) {
     const [opened, {open, close}] = useDisclosure(false);
 
@@ -104,7 +107,15 @@ export default function ListColumn({
 
                             return Number(a.priority) - Number(b.priority);
                         }).map(task => (
-                            <TaskCard key={task.id} task={task} listId={list.id} onError={onError}/>
+                            <TaskCard
+                                key={task.id}
+                                task={task}
+                                listId={list.id}
+                                onError={onError}
+                                onStatusToggle={onTaskStatusToggle}
+                                onDelete={onTaskDelete}
+                                onUpdate={onTaskUpdate}
+                            />
                         ))}
                 </Stack>
             </ScrollArea>

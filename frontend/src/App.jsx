@@ -27,7 +27,7 @@ function App() {
     const router = createBrowserRouter(
         createRoutesFromElements(
             <Route path="/">
-                <Route index element={<Navigate to="home" replace/>}/>
+                <Route index element={<Navigate to="dashboard/today" replace/>}/>
 
                     <Route element={<RequireAuth/>}>
                         <Route element={<RootLayout/>}>
@@ -42,7 +42,6 @@ function App() {
                         {/*
                         <Route path="settings" element={<SettingsPage />} />
                         */}
-                        <Route path="home" element={<HomePage/>}/>
                     </Route>
                 </Route>
 

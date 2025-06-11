@@ -227,7 +227,7 @@ class DashboardController extends Controller
             return $this->json(['message' => 'Forbidden'], 403);
         }
 
-        $teamModel->delete(['id' => $teamId]);
+        $teamModel->deleteById($teamId);
 
         return $this->json(['deleteId' => $teamId]);
     }
@@ -334,7 +334,7 @@ class DashboardController extends Controller
             return $this->json(['message' => 'Dashboard not found'], 404);
         }
 
-        $groupModel->delete(['id' => $dashboardId]);
+        $groupModel->deleteById($dashboardId);
 
         return $this->json(['deleteId' => $dashboardId]);
     }

@@ -17,17 +17,18 @@ import {
     IconSubtask,
 } from '@tabler/icons-react';
 import { useDisclosure } from "@mantine/hooks";
-import {
-    useUpdateTaskInListMutation,
-    useDeleteTaskFromListMutation
-} from '../features/customDashboard/customDashboardApi';
 import TaskViewModal from './TaskViewModal';
 import TaskEditModal from './TaskEditModal';
 import { formatDate, getPriorityColor, isOverdue } from '../utils/taskUtils';
 
-export default function TaskCard({task, listId, onError}) {
-    const [updateTask] = useUpdateTaskInListMutation();
-    const [deleteTask] = useDeleteTaskFromListMutation();
+export default function TaskCard({
+                                     task,
+                                     listId,
+                                     onError,
+                                     onStatusToggle,
+                                     onDelete,
+                                     onUpdate
+                                 }) {
     const [viewModalOpened, {open: openViewModal, close: closeViewModal}] = useDisclosure(false);
     const [editModalOpened, {open: openEditModal, close: closeEditModal}] = useDisclosure(false);
     const [isCompleting, setIsCompleting] = useState(false);
@@ -43,11 +44,7 @@ export default function TaskCard({task, listId, onError}) {
         setIsCompleting(true);
         try {
             const newStatus = task.status === 'completed' ? 'pending' : 'completed';
-            await updateTask({
-                listId: listId,
-                taskId: task.id,
-                task: {...task, status: newStatus}
-            }).unwrap();
+            await onStatusToggle(task.id, newStatus);
         } catch (error) {
             console.error('Error updating task status:', error);
             onError?.('Failed to update task status');
@@ -58,7 +55,7 @@ export default function TaskCard({task, listId, onError}) {
 
     const handleDelete = async () => {
         try {
-            await deleteTask({listId, taskId: task.id}).unwrap();
+            await onDelete(task.id);
         } catch (error) {
             console.error('Error deleting task:', error);
             onError?.('Failed to delete task');
@@ -67,11 +64,7 @@ export default function TaskCard({task, listId, onError}) {
 
     const handleEditSave = async (updatedTask) => {
         try {
-            await updateTask({
-                listId: listId,
-                taskId: task.id,
-                task: updatedTask
-            }).unwrap();
+            await onUpdate(task.id, updatedTask);
             closeEditModal();
         } catch (error) {
             console.error('Error updating task:', error);

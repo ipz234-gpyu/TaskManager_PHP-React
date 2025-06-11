@@ -13,6 +13,7 @@ import {
     updateTeamDashboard,
 } from './dashboardsSlice.js';
 import { setCustomDashboard } from '../customDashboard/customDashboardSlice.js'
+import { setTeamDashboard } from '../teamDashboard/teamDashboardSlice.js'
 import { baseQueryWithReauth } from './../baseApi';
 
 export const dashboardsApi = createApi({
@@ -173,13 +174,14 @@ export const dashboardsApi = createApi({
                 method: 'PUT',
                 body: JSON.stringify({teamId, dashboardId, name})
             }),
-            async onQueryStarted({teamId}, {dispatch, queryFulfilled}) {
+            async onQueryStarted(_, {dispatch, queryFulfilled, getState}) {
                 try {
                     const {data} = await queryFulfilled;
-                    dispatch(updateTeamDashboard({
-                        teamId,
-                        dashboard: data.data.dashboard
-                    }));
+                    dispatch(updateTeamDashboard(data.data.dashboard));
+
+                    if (data.data.dashboard.id === getState().dashboards.activeTab) {
+                        dispatch(setTeamDashboard(data.data.dashboard))
+                    }
                 } catch {
                 }
             },

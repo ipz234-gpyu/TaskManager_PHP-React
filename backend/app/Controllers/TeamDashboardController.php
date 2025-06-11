@@ -131,7 +131,6 @@ class TeamDashboardController extends Controller
             return $this->json(['message' => 'List ID, Team ID and name are required'], 400);
         }
 
-        // Перевіряємо чи користувач є членом команди
         $userTeamModel = new UserTeamModel();
         if (!$userTeamModel->isUserInTeam($userId, $teamId)) {
             return $this->json(['message' => 'Forbidden'], 403);
@@ -166,7 +165,6 @@ class TeamDashboardController extends Controller
             return $this->json(['message' => 'List ID and Team ID are required'], 400);
         }
 
-        // Перевіряємо чи користувач є членом команди
         $userTeamModel = new UserTeamModel();
         if (!$userTeamModel->isUserInTeam($userId, $teamId)) {
             return $this->json(['message' => 'Forbidden'], 403);
@@ -285,7 +283,6 @@ class TeamDashboardController extends Controller
             return $this->json(['message' => 'Task ID, List ID and Team ID are required'], 400);
         }
 
-        // Перевіряємо чи користувач є членом команди
         $userTeamModel = new UserTeamModel();
         if (!$userTeamModel->isUserInTeam($userId, $teamId)) {
             return $this->json(['message' => 'Forbidden'], 403);
@@ -318,7 +315,6 @@ class TeamDashboardController extends Controller
             return $this->json(['message' => 'Task ID, source and destination list IDs and Team ID are required'], 400);
         }
 
-        // Перевіряємо чи користувач є членом команди
         $userTeamModel = new UserTeamModel();
         if (!$userTeamModel->isUserInTeam($userId, $teamId)) {
             return $this->json(['message' => 'Forbidden'], 403);
@@ -354,7 +350,6 @@ class TeamDashboardController extends Controller
             return $this->json(['message' => 'List ID, Team ID and task IDs are required'], 400);
         }
 
-        // Перевіряємо чи користувач є членом команди
         $userTeamModel = new UserTeamModel();
         if (!$userTeamModel->isUserInTeam($userId, $teamId)) {
             return $this->json(['message' => 'Forbidden'], 403);

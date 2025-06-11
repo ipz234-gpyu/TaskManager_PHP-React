@@ -21,6 +21,8 @@ import {
     useDeleteListFromTeamDashboardMutation,
     useUpdateListInTeamDashboardMutation,
     useAddTaskToTeamListMutation,
+    useUpdateTaskInTeamListMutation,
+    useDeleteTaskFromTeamListMutation,
 } from '../features/teamDashboard/teamDashboardApi';
 import ListColumn from '../components/ListColumn.jsx';
 import DashboardHeader from "../components/DashboardHeader.jsx";
@@ -44,6 +46,8 @@ export default function TeamDashboard() {
     const [updateList, { isLoading: isListUpdating }] = useUpdateListInTeamDashboardMutation();
     const [deleteList, { isLoading: isListDeleting }] = useDeleteListFromTeamDashboardMutation();
     const [addTask, { isLoading: isTaskAdding }] = useAddTaskToTeamListMutation();
+    const [updateTask] = useUpdateTaskInTeamListMutation();
+    const [deleteTask] = useDeleteTaskFromTeamListMutation();
 
     const addListHandle = async (values) => {
         try {
@@ -61,6 +65,32 @@ export default function TeamDashboard() {
         catch {
             setError('Add task failed');
         }
+    };
+
+    const handleTaskStatusToggle = async (listId, taskId, newStatus) => {
+        const list = lists.find(l => l.id === listId);
+        const task = list?.tasks.find(t => t.id === taskId);
+        if (!task) return;
+
+        await updateTask({
+            listId: listId,
+            taskId: taskId,
+            task: {...task, status: newStatus},
+            teamId
+        }).unwrap();
+    };
+
+    const handleTaskDelete = async (listId, taskId) => {
+        await deleteTask({listId, taskId, teamId}).unwrap();
+    };
+
+    const handleTaskUpdate = async (listId, taskId, updatedTask) => {
+        await updateTask({
+            listId: listId,
+            taskId: taskId,
+            task: updatedTask,
+            teamId
+        }).unwrap();
     };
 
     const handleUpdateDashboard = (list) => {
@@ -150,6 +180,10 @@ export default function TeamDashboard() {
                             handleDeleteClick={handleDeleteClick}
                             onAddTask={addTaskHandle}
                             onError={setError}
+                            // Task handlers
+                            onTaskStatusToggle={(taskId, newStatus) => handleTaskStatusToggle(list.id, taskId, newStatus)}
+                            onTaskDelete={(taskId) => handleTaskDelete(list.id, taskId)}
+                            onTaskUpdate={(taskId, updatedTask) => handleTaskUpdate(list.id, taskId, updatedTask)}
                         />
                     ))}
                 </Group>

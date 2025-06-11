@@ -78,7 +78,7 @@ export const teamDashboardApi = createApi({
                 method: 'DELETE',
                 body: JSON.stringify(credentials)
             }),
-            async onQueryStarted(arg, {dispatch, queryFulfilled }) {
+            async onQueryStarted(arg, {dispatch, queryFulfilled}) {
                 try {
                     const {data} = await queryFulfilled;
                     dispatch(deleteList(data.data.deleteId));
@@ -112,8 +112,7 @@ export const teamDashboardApi = createApi({
                     const state = getState();
                     const activeTab = state.dashboards.activeTab;
 
-                    const currentDashboard = state.dashboards.teamDashboards.find(d => d.id === activeTab);
-
+                    const currentDashboard = state.dashboards.teams.flatMap(team => team.dashboards).find(d => d.id === activeTab);
                     if (currentDashboard) {
                         dispatch(updateTeamDashboard({
                             ...currentDashboard,
@@ -161,8 +160,7 @@ export const teamDashboardApi = createApi({
                     const state = getState();
                     const activeTab = state.dashboards.activeTab;
 
-                    const currentDashboard = state.dashboards.teamDashboards.find(d => d.id === activeTab);
-
+                    const currentDashboard = state.dashboards.teams.flatMap(team => team.dashboards).find(d => d.id === activeTab);
                     if (currentDashboard) {
                         dispatch(updateTeamDashboard({
                             ...currentDashboard,

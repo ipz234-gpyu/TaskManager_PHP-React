@@ -164,7 +164,7 @@ export default function TeamDashboard({setError}) {
                 dashboardId: dashboardToDelete
             }).unwrap();
             closeDashboardDelete();
-            if (activeTab === `team-${currentTeamId}-${dashboardToDelete}`) {
+            if (activeTab === dashboardToDelete) {
                 navigate('/dashboard/today');
             }
         } catch {

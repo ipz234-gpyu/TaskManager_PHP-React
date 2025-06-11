@@ -24,7 +24,7 @@ export default function NotFound() {
                         address.
                     </Text>
                     <Group mt="xl">
-                        <Button size="md" variant="filled" color="blue" onClick={() => navigate('/')}>
+                        <Button size="md" variant="filled" color="blue" onClick={() => navigate('/dashboard/today')}>
                             Go back to Home
                         </Button>
                     </Group>
