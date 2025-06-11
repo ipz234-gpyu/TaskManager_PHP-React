@@ -7,7 +7,7 @@ import {
     Text,
     Avatar,
 } from '@mantine/core';
-import { IconPin, IconPinned, IconSettings, IconStar } from '@tabler/icons-react';
+import { IconPin, IconPinned, IconSettings, IconStar, IconUser } from '@tabler/icons-react';
 import { useNavigate } from 'react-router-dom';
 import { useSelector } from "react-redux";
 import DashboardTabs from './DashboardTabs';
@@ -28,7 +28,11 @@ export default function Navbar({pinned, setPinned, isHoveringRef, setExpanded}) 
         <div className="h-full flex flex-col">
             <Group justify="space-between" className="p-5 border-b border-gray-600">
                 <Group>
-                    <Avatar name={user ? `${user.name} ${user.surname}` : null} color="initials"/>
+                    <Avatar name={user ? `${user.name} ${user.surname}` : null}
+                            src={user?.avatar}
+                            size="lg"
+                            radius="xl"
+                            color="initials"/>
                     <Text fw={600} size="xl" className="text-gray-100">
                         {user ? `${user.name} ${user.surname}` : null}
                     </Text>
@@ -40,7 +44,7 @@ export default function Navbar({pinned, setPinned, isHoveringRef, setExpanded}) 
                 </Tooltip>
             </Group>
 
-            <DashboardTabs />
+            <DashboardTabs/>
 
             <div className="mt-auto p-4 border-t border-gray-600">
                 <Tooltip label="Settings" position="right">

@@ -6,7 +6,7 @@ export const baseQuery = fetchBaseQuery({
     baseUrl: 'http://backend-kurswork.local/api',
 
     prepareHeaders: (headers, {getState}) => {
-        headers.set('Content-Type', 'application/json');
+        //headers.set('Content-Type', 'application/json');
         const token = getState().auth.accessToken;
 
         if (token) {
@@ -17,6 +17,15 @@ export const baseQuery = fetchBaseQuery({
 });
 
 export const baseQueryWithReauth = async (args, api, extraOptions) => {
+    if (!(args.body instanceof FormData)) {
+        if (!args.headers) {
+            args.headers = {};
+        }
+        if (!args.headers['Content-Type']) {
+            args.headers['Content-Type'] = 'application/json';
+        }
+    }
+
     let result = await baseQuery(args, api, extraOptions);
 
     if (result?.error?.status === 401) {

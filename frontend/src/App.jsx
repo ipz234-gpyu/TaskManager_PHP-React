@@ -15,13 +15,12 @@ import RequireAuth from "./routes/RequireAuth.jsx";
 import NotFound from "./pages/NotFound.jsx";
 import LoginPage from "./pages/LoginPage.jsx";
 import RegisterPage from "./pages/RegisterPage.jsx";
-import HomePage from "./pages/HomePage.jsx";
 import TodayDashboard from "./pages/dashboards/TodayDashboard.jsx";
 import UpcomingDashboard from "./pages/dashboards/UpcomingDashboard.jsx";
 import ImportantDashboard from "./pages/dashboards/ImportantDashboard.jsx";
 import CustomDashboard from "./pages/CustomDashboard.jsx";
 import TeamDashboard from "./pages/TeamDashboard.jsx";
-//import SettingsPage from "./pages/SettingsPage.jsx";
+import SettingsPage from "./pages/SettingsPage.jsx";
 
 function App() {
     const router = createBrowserRouter(
@@ -39,9 +38,8 @@ function App() {
                             <Route path="custom/:dashboardId" element={<CustomDashboard/>}/>
                             <Route path="team/:teamId/:dashboardId" element={<TeamDashboard/>}/>
                         </Route>
-                        {/*
+
                         <Route path="settings" element={<SettingsPage />} />
-                        */}
                     </Route>
                 </Route>
 
