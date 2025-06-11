@@ -56,6 +56,27 @@ class ListModel extends Model
 
         return $list;
     }
+    public function findByTeamDashboardId(string $dashboardId): array
+    {
+        $lists = $this->query()
+            ->select([
+                'l.id', 'l.name', 'l.priority'
+            ])
+            ->join('group_lists_from_team glt', 'glt.list_id = l.id')
+            ->where('glt.group_id', '=', $dashboardId)
+            ->orderBy('l.priority')
+            ->get();
+
+        if (empty($lists)) {
+            return [];
+        }
+
+        foreach ($lists as &$list){
+            $list['tasks'] = (new TaskModel())->findByListId($list['id']);
+        }
+
+        return $lists;
+    }
     public function hasUserAccess(string $listId, string $userId): bool
     {
         $result = $this->query()
@@ -64,6 +85,18 @@ class ListModel extends Model
             ->join('groups_from_user g', 'g.id = glu.group_id')
             ->where('l.id', '=', $listId)
             ->where('g.user_id', '=', $userId)
+            ->first();
+
+        return $result !== null;
+    }
+    public function hasTeamAccess(string $listId, string $teamId): bool
+    {
+        $result = $this->query()
+            ->select(['l.id'])
+            ->join('group_lists_from_team glt', 'glt.list_id = l.id')
+            ->join('groups_from_team g', 'g.id = glt.group_id')
+            ->where('l.id', '=', $listId)
+            ->where('g.team_id', '=', $teamId)
             ->first();
 
         return $result !== null;

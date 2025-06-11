@@ -28,7 +28,7 @@ export default function DashboardHeader({
                                         }) {
     const allTasks = lists.flatMap(list => list.tasks || []);
     const completedTasks = allTasks.filter(task => task.status === 'completed');
-    const pendingTasks = allTasks.filter(task => task.status === 'pending');
+    const pendingTasks = allTasks.filter(task => task.status !== 'completed');
 
     const [opened, {open, close}] = useDisclosure(false);
     const form = useForm({initialValues: {name: ''}});

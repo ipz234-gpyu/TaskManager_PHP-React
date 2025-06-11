@@ -1,7 +1,7 @@
 import { createApi } from '@reduxjs/toolkit/query/react';
 import {
     setLists,
-    setCustomDashboard,
+    setTeamDashboard,
     addList,
     updateList,
     deleteList,
@@ -11,34 +11,37 @@ import {
     moveTask,
     reorderTasks,
     reorderLists
-} from './customDashboardSlice.js';
+} from './teamDashboardSlice.js';
 import { baseQueryWithReauth } from './../baseApi';
-import { updateCustomDashboard } from "../dashboards/dashboardsSlice.js";
+import { updateTeamDashboard } from "../dashboards/dashboardsSlice.js";
 import { dashboardsApi } from "../dashboards/dashboardsApi.js";
 
-export const customDashboardApi = createApi({
-    reducerPath: 'customDashboardApi',
+export const teamDashboardApi = createApi({
+    reducerPath: 'teamDashboardApi',
     baseQuery: baseQueryWithReauth,
     endpoints: (builder) => ({
-        getCustomDashboard: builder.mutation({
+        getTeamDashboard: builder.mutation({
             query: (credentials) => ({
-                url: '/customDashboard/getDashboard',
+                url: '/teamDashboard/getDashboard',
                 method: 'POST',
-                body: JSON.stringify({dashboardId: credentials})
+                body: JSON.stringify({
+                    dashboardId: credentials.dashboardId,
+                    teamId: credentials.teamId
+                })
             }),
             async onQueryStarted(_, {dispatch, queryFulfilled}) {
                 try {
                     const {data} = await queryFulfilled;
-                    dispatch(setCustomDashboard(data.data.dashboard));
+                    dispatch(setTeamDashboard(data.data.dashboard));
                     dispatch(setLists(data.data.lists));
                 } catch (error) {
-                    console.error('Error loading dashboard:', error);
+                    console.error('Error loading team dashboard:', error);
                 }
             },
         }),
-        addListToDashboard: builder.mutation({
+        addListToTeamDashboard: builder.mutation({
             query: (credentials) => ({
-                url: '/customDashboard/addList',
+                url: '/teamDashboard/addList',
                 method: 'POST',
                 body: JSON.stringify(credentials)
             }),
@@ -47,13 +50,13 @@ export const customDashboardApi = createApi({
                     const {data} = await queryFulfilled;
                     dispatch(addList(data.data.list));
                 } catch (error) {
-                    console.error('Error adding list:', error);
+                    console.error('Error adding list to team dashboard:', error);
                 }
             },
         }),
-        updateListInDashboard: builder.mutation({
+        updateListInTeamDashboard: builder.mutation({
             query: (credentials) => ({
-                url: '/customDashboard/updateList',
+                url: '/teamDashboard/updateList',
                 method: 'PUT',
                 body: JSON.stringify(credentials)
             }),
@@ -61,17 +64,17 @@ export const customDashboardApi = createApi({
                 try {
                     const {data} = await queryFulfilled;
                     dispatch(updateList({
-                        id: arg.id,
+                        id: arg.listId,
                         ...data.data.list
                     }));
                 } catch (error) {
-                    console.error('Error updating list:', error);
+                    console.error('Error updating list in team dashboard:', error);
                 }
             },
         }),
-        deleteListFromDashboard: builder.mutation({
+        deleteListFromTeamDashboard: builder.mutation({
             query: (credentials) => ({
-                url: '/customDashboard/deleteList',
+                url: '/teamDashboard/deleteList',
                 method: 'DELETE',
                 body: JSON.stringify(credentials)
             }),
@@ -81,19 +84,20 @@ export const customDashboardApi = createApi({
                     dispatch(deleteList(data.data.deleteId));
 
                     dispatch(
-                        dashboardsApi.endpoints.getCustomDashboards.initiate({
+                        dashboardsApi.endpoints.getTeamDashboards.initiate({
+                            teamId: arg.teamId,
                             forceRefetch: true
                         })
                     );
                 } catch (error) {
-                    console.error('Error deleting list:', error);
+                    console.error('Error deleting list from team dashboard:', error);
                 }
             },
         }),
 
-        addTaskToList: builder.mutation({
+        addTaskToTeamList: builder.mutation({
             query: (credentials) => ({
-                url: '/customDashboard/addTask',
+                url: '/teamDashboard/addTask',
                 method: 'POST',
                 body: JSON.stringify(credentials)
             }),
@@ -108,22 +112,22 @@ export const customDashboardApi = createApi({
                     const state = getState();
                     const activeTab = state.dashboards.activeTab;
 
-                    const currentDashboard = state.dashboards.customDashboards.find(d => d.id === activeTab);
+                    const currentDashboard = state.dashboards.teamDashboards.find(d => d.id === activeTab);
 
                     if (currentDashboard) {
-                        dispatch(updateCustomDashboard({
+                        dispatch(updateTeamDashboard({
                             ...currentDashboard,
                             count: (currentDashboard.count || 0) + 1
                         }));
                     }
                 } catch (error) {
-                    console.error('Error adding task:', error);
+                    console.error('Error adding task to team list:', error);
                 }
             },
         }),
-        updateTaskInList: builder.mutation({
+        updateTaskInTeamList: builder.mutation({
             query: (credentials) => ({
-                url: '/customDashboard/updateTask',
+                url: '/teamDashboard/updateTask',
                 method: 'PUT',
                 body: JSON.stringify(credentials)
             }),
@@ -136,13 +140,13 @@ export const customDashboardApi = createApi({
                         updates: data.data.task
                     }));
                 } catch (error) {
-                    console.error('Error updating task:', error);
+                    console.error('Error updating task in team list:', error);
                 }
             },
         }),
-        deleteTaskFromList: builder.mutation({
+        deleteTaskFromTeamList: builder.mutation({
             query: (credentials) => ({
-                url: '/customDashboard/deleteTask',
+                url: '/teamDashboard/deleteTask',
                 method: 'POST',
                 body: JSON.stringify(credentials)
             }),
@@ -157,22 +161,22 @@ export const customDashboardApi = createApi({
                     const state = getState();
                     const activeTab = state.dashboards.activeTab;
 
-                    const currentDashboard = state.dashboards.customDashboards.find(d => d.id === activeTab);
+                    const currentDashboard = state.dashboards.teamDashboards.find(d => d.id === activeTab);
 
                     if (currentDashboard) {
-                        dispatch(updateCustomDashboard({
+                        dispatch(updateTeamDashboard({
                             ...currentDashboard,
                             count: (currentDashboard.count || 0) - 1
                         }));
                     }
                 } catch (error) {
-                    console.error('Error deleting task:', error);
+                    console.error('Error deleting task from team list:', error);
                 }
             },
         }),
-        moveTaskBetweenLists: builder.mutation({
+        moveTaskBetweenTeamLists: builder.mutation({
             query: (credentials) => ({
-                url: '/customDashboard/moveTask',
+                url: '/teamDashboard/moveTask',
                 method: 'POST',
                 body: JSON.stringify(credentials)
             }),
@@ -187,13 +191,13 @@ export const customDashboardApi = createApi({
                         destIndex: arg.destIndex
                     }));
                 } catch (error) {
-                    console.error('Error moving task:', error);
+                    console.error('Error moving task between team lists:', error);
                 }
             },
         }),
-        reorderTasksInList: builder.mutation({
+        reorderTasksInTeamList: builder.mutation({
             query: (credentials) => ({
-                url: '/customDashboard/reorderTasks',
+                url: '/teamDashboard/reorderTasks',
                 method: 'POST',
                 body: JSON.stringify(credentials)
             }),
@@ -206,13 +210,13 @@ export const customDashboardApi = createApi({
                         destIndex: arg.destIndex
                     }));
                 } catch (error) {
-                    console.error('Error reordering tasks:', error);
+                    console.error('Error reordering tasks in team list:', error);
                 }
             },
         }),
-        reorderListsInDashboard: builder.mutation({
+        reorderListsInTeamDashboard: builder.mutation({
             query: (credentials) => ({
-                url: '/customDashboard/reorderLists',
+                url: '/teamDashboard/reorderLists',
                 method: 'POST',
                 body: JSON.stringify(credentials)
             }),
@@ -224,7 +228,7 @@ export const customDashboardApi = createApi({
                         destIndex: arg.destIndex
                     }));
                 } catch (error) {
-                    console.error('Error reordering lists:', error);
+                    console.error('Error reordering lists in team dashboard:', error);
                 }
             },
         }),
@@ -232,14 +236,14 @@ export const customDashboardApi = createApi({
 });
 
 export const {
-    useGetCustomDashboardMutation,
-    useAddListToDashboardMutation,
-    useUpdateListInDashboardMutation,
-    useDeleteListFromDashboardMutation,
-    useAddTaskToListMutation,
-    useUpdateTaskInListMutation,
-    useDeleteTaskFromListMutation,
-    useMoveTaskBetweenListsMutation,
-    useReorderTasksInListMutation,
-    useReorderListsInDashboardMutation
-} = customDashboardApi;
+    useGetTeamDashboardMutation,
+    useAddListToTeamDashboardMutation,
+    useUpdateListInTeamDashboardMutation,
+    useDeleteListFromTeamDashboardMutation,
+    useAddTaskToTeamListMutation,
+    useUpdateTaskInTeamListMutation,
+    useDeleteTaskFromTeamListMutation,
+    useMoveTaskBetweenTeamListsMutation,
+    useReorderTasksInTeamListMutation,
+    useReorderListsInTeamDashboardMutation
+} = teamDashboardApi;

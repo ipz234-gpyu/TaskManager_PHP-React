@@ -18,8 +18,9 @@ import RegisterPage from "./pages/RegisterPage.jsx";
 import HomePage from "./pages/HomePage.jsx";
 import TodayDashboard from "./pages/dashboards/TodayDashboard.jsx";
 import UpcomingDashboard from "./pages/dashboards/UpcomingDashboard.jsx";
-import CustomDashboard from "./pages/CustomDashboard.jsx";
 import ImportantDashboard from "./pages/dashboards/ImportantDashboard.jsx";
+import CustomDashboard from "./pages/CustomDashboard.jsx";
+import TeamDashboard from "./pages/TeamDashboard.jsx";
 //import SettingsPage from "./pages/SettingsPage.jsx";
 
 function App() {
@@ -36,7 +37,7 @@ function App() {
                             <Route path="important" element={<ImportantDashboard />}/>
 
                             <Route path="custom/:dashboardId" element={<CustomDashboard/>}/>
-                            <Route path="team/:teamId/:dashboardId" element={<CustomDashboard/>}/>
+                            <Route path="team/:teamId/:dashboardId" element={<TeamDashboard/>}/>
                         </Route>
                         {/*
                         <Route path="settings" element={<SettingsPage />} />

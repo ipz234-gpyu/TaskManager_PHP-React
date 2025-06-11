@@ -13,6 +13,15 @@ class UserTeamModel extends Model
     {
         return $this->query()->insert($data);
     }
+    public function isUserInTeam(string $userId, string $teamId): bool
+    {
+        $result = $this->query()
+            ->where('user_id', '=', $userId)
+            ->where('team_id', '=', $teamId)
+            ->first();
+
+        return $result !== null;
+    }
     public function findById(string $id): ?array
     {
         return $this->query()->where('id', '=', $id)->first();

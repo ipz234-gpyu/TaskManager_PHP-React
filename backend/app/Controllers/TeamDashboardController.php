@@ -4,14 +4,15 @@ namespace App\Controllers;
 
 use App\Core\Controller;
 use App\Core\Request;
-use App\Models\GroupFromUserModel;
+use App\Models\GroupFromTeamModel;
 use App\Models\ListModel;
 use App\Models\TaskListModel;
 use App\Models\TaskModel;
-use App\Models\GroupListFromUserModel;
+use App\Models\GroupListFromTeamModel;
+use App\Models\UserTeamModel;
 use Ramsey\Uuid\Uuid;
 
-class CustomDashboardController extends Controller
+class TeamDashboardController extends Controller
 {
     public array $middlewares = [
         'actionGetDashboard' => ['auth'],
@@ -30,31 +31,38 @@ class CustomDashboardController extends Controller
     {
         $data = Request::json();
         $dashboardId = $data['dashboardId'] ?? '';
+        $teamId = $data['teamId'] ?? '';
         $userId = Request::user()['id'];
 
-        if (empty($dashboardId)) {
-            return $this->json(['message' => 'Dashboard ID is required'], 400);
+        if (empty($dashboardId) || empty($teamId)) {
+            return $this->json(['message' => 'Dashboard ID and Team ID are required'], 400);
         }
 
-        $dashboardModel = new GroupFromUserModel();
+        $userTeamModel = new UserTeamModel();
+        if (!$userTeamModel->isUserInTeam($userId, $teamId)) {
+            return $this->json(['message' => 'Forbidden'], 403);
+        }
+
+        $dashboardModel = new GroupFromTeamModel();
         $dashboard = $dashboardModel->findById($dashboardId);
 
         if (!$dashboard) {
             return $this->json(['message' => 'Dashboard not found'], 404);
         }
 
-        if ($dashboard['user_id'] !== $userId) {
+        if ($dashboard['team_id'] !== $teamId) {
             return $this->json(['message' => 'Forbidden'], 403);
         }
 
         $listModel = new ListModel();
-        $lists = $listModel->findByDashboardId($dashboardId);
+        $lists = $listModel->findByTeamDashboardId($dashboardId);
 
         return $this->json([
             'dashboard' => [
                 'id' => $dashboard['id'],
                 'name' => $dashboard['name'],
                 'priority' => $dashboard['priority'],
+                'team_id' => $dashboard['team_id'],
             ],
             'lists' => $lists
         ]);
@@ -64,23 +72,28 @@ class CustomDashboardController extends Controller
     {
         $data = Request::json();
         $dashboardId = $data['dashboardId'] ?? '';
+        $teamId = $data['teamId'] ?? '';
         $name = $data['name'] ?? '';
         $priority = $data['priority'] ?? 0;
         $userId = Request::user()['id'];
 
-        if (empty($dashboardId) || empty($name)) {
-            return $this->json(['message' => 'Dashboard ID and name are required'], 400);
+        if (empty($dashboardId) || empty($teamId) || empty($name)) {
+            return $this->json(['message' => 'Dashboard ID, Team ID and name are required'], 400);
         }
 
-        $dashboardModel = new GroupFromUserModel();
+        $userTeamModel = new UserTeamModel();
+        if (!$userTeamModel->isUserInTeam($userId, $teamId)) {
+            return $this->json(['message' => 'Forbidden'], 403);
+        }
+
+        $dashboardModel = new GroupFromTeamModel();
         $dashboard = $dashboardModel->findById($dashboardId);
 
-        if (!$dashboard || $dashboard['user_id'] !== $userId) {
+        if (!$dashboard || $dashboard['team_id'] !== $teamId) {
             return $this->json(['message' => 'Forbidden'], 403);
         }
 
         $listId = Uuid::uuid4()->toString();
-        $groupListId = Uuid::uuid4()->toString();
 
         $listModel = new ListModel();
         $listModel->fill([
@@ -89,7 +102,7 @@ class CustomDashboardController extends Controller
             'priority' => $priority,
         ])->save();
 
-        $groupListModel = new GroupListFromUserModel();
+        $groupListModel = new GroupListFromTeamModel();
         $groupListModel->fill([
             'list_id' => $listId,
             'group_id' => $dashboardId,
@@ -109,16 +122,23 @@ class CustomDashboardController extends Controller
     {
         $data = Request::json();
         $listId = $data['listId'] ?? '';
+        $teamId = $data['teamId'] ?? '';
         $name = $data['name'] ?? '';
         $priority = $data['priority'] ?? null;
         $userId = Request::user()['id'];
 
-        if (empty($listId) || empty($name)) {
-            return $this->json(['message' => 'List ID and name are required'], 400);
+        if (empty($listId) || empty($teamId) || empty($name)) {
+            return $this->json(['message' => 'List ID, Team ID and name are required'], 400);
+        }
+
+        // Перевіряємо чи користувач є членом команди
+        $userTeamModel = new UserTeamModel();
+        if (!$userTeamModel->isUserInTeam($userId, $teamId)) {
+            return $this->json(['message' => 'Forbidden'], 403);
         }
 
         $listModel = new ListModel();
-        if (!$listModel->hasUserAccess($listId, $userId)) {
+        if (!$listModel->hasTeamAccess($listId, $teamId)) {
             return $this->json(['message' => 'Forbidden'], 403);
         }
 
@@ -139,14 +159,21 @@ class CustomDashboardController extends Controller
     {
         $data = Request::json();
         $listId = $data['listId'] ?? '';
+        $teamId = $data['teamId'] ?? '';
         $userId = Request::user()['id'];
 
-        if (empty($listId)) {
-            return $this->json(['message' => 'List ID is required'], 400);
+        if (empty($listId) || empty($teamId)) {
+            return $this->json(['message' => 'List ID and Team ID are required'], 400);
+        }
+
+        // Перевіряємо чи користувач є членом команди
+        $userTeamModel = new UserTeamModel();
+        if (!$userTeamModel->isUserInTeam($userId, $teamId)) {
+            return $this->json(['message' => 'Forbidden'], 403);
         }
 
         $listModel = new ListModel();
-        if (!$listModel->hasUserAccess($listId, $userId)) {
+        if (!$listModel->hasTeamAccess($listId, $teamId)) {
             return $this->json(['message' => 'Forbidden'], 403);
         }
 
@@ -159,6 +186,7 @@ class CustomDashboardController extends Controller
     {
         $data = Request::json();
         $listId = $data['listId'] ?? '';
+        $teamId = $data['teamId'] ?? '';
         $title = $data['title'] ?? '';
         $description = $data['description'] ?? '';
         $start_time = $data['startTime'] ?? null;
@@ -168,12 +196,18 @@ class CustomDashboardController extends Controller
         $status = $data['status'] ?? 'todo';
         $userId = Request::user()['id'];
 
-        if (empty($listId) || empty($title)) {
-            return $this->json(['message' => 'List ID and title are required'], 400);
+        if (empty($listId) || empty($teamId) || empty($title)) {
+            return $this->json(['message' => 'List ID, Team ID and title are required'], 400);
+        }
+
+        // Перевіряємо чи користувач є членом команди
+        $userTeamModel = new UserTeamModel();
+        if (!$userTeamModel->isUserInTeam($userId, $teamId)) {
+            return $this->json(['message' => 'Forbidden'], 403);
         }
 
         $listModel = new ListModel();
-        if (!$listModel->hasUserAccess($listId, $userId)) {
+        if (!$listModel->hasTeamAccess($listId, $teamId)) {
             return $this->json(['message' => 'Forbidden'], 403);
         }
 
@@ -205,15 +239,21 @@ class CustomDashboardController extends Controller
     {
         $data = Request::json();
         $listId = $data['listId'] ?? '';
+        $teamId = $data['teamId'] ?? '';
         $taskId = $data['taskId'] ?? '';
         $userId = Request::user()['id'];
 
-        if (empty($taskId) || empty($listId)) {
-            return $this->json(['message' => 'Task ID and List ID are required'], 400);
+        if (empty($taskId) || empty($listId) || empty($teamId)) {
+            return $this->json(['message' => 'Task ID, List ID and Team ID are required'], 400);
+        }
+
+        $userTeamModel = new UserTeamModel();
+        if (!$userTeamModel->isUserInTeam($userId, $teamId)) {
+            return $this->json(['message' => 'Forbidden'], 403);
         }
 
         $listModel = new ListModel();
-        if (!$listModel->hasUserAccess($listId, $userId)) {
+        if (!$listModel->hasTeamAccess($listId, $teamId)) {
             return $this->json(['message' => 'Forbidden'], 403);
         }
 
@@ -238,14 +278,21 @@ class CustomDashboardController extends Controller
         $data = Request::json();
         $taskId = $data['taskId'] ?? '';
         $listId = $data['listId'] ?? '';
+        $teamId = $data['teamId'] ?? '';
         $userId = Request::user()['id'];
 
-        if (empty($taskId) || empty($listId)) {
-            return $this->json(['message' => 'Task ID and List ID are required'], 400);
+        if (empty($taskId) || empty($listId) || empty($teamId)) {
+            return $this->json(['message' => 'Task ID, List ID and Team ID are required'], 400);
+        }
+
+        // Перевіряємо чи користувач є членом команди
+        $userTeamModel = new UserTeamModel();
+        if (!$userTeamModel->isUserInTeam($userId, $teamId)) {
+            return $this->json(['message' => 'Forbidden'], 403);
         }
 
         $listModel = new ListModel();
-        if (!$listModel->hasUserAccess($listId, $userId)) {
+        if (!$listModel->hasTeamAccess($listId, $teamId)) {
             return $this->json(['message' => 'Forbidden'], 403);
         }
 
@@ -264,16 +311,23 @@ class CustomDashboardController extends Controller
         $taskId = $data['taskId'] ?? '';
         $sourceListId = $data['sourceListId'] ?? '';
         $destListId = $data['destListId'] ?? '';
+        $teamId = $data['teamId'] ?? '';
         $userId = Request::user()['id'];
 
-        if (empty($taskId) || empty($sourceListId) || empty($destListId)) {
-            return $this->json(['message' => 'Task ID, source and destination list IDs are required'], 400);
+        if (empty($taskId) || empty($sourceListId) || empty($destListId) || empty($teamId)) {
+            return $this->json(['message' => 'Task ID, source and destination list IDs and Team ID are required'], 400);
+        }
+
+        // Перевіряємо чи користувач є членом команди
+        $userTeamModel = new UserTeamModel();
+        if (!$userTeamModel->isUserInTeam($userId, $teamId)) {
+            return $this->json(['message' => 'Forbidden'], 403);
         }
 
         $listModel = new ListModel();
 
-        if (!$listModel->hasUserAccess($sourceListId, $userId) ||
-            !$listModel->hasUserAccess($destListId, $userId)) {
+        if (!$listModel->hasTeamAccess($sourceListId, $teamId) ||
+            !$listModel->hasTeamAccess($destListId, $teamId)) {
             return $this->json(['message' => 'Forbidden'], 403);
         }
 
@@ -292,15 +346,22 @@ class CustomDashboardController extends Controller
     {
         $data = Request::json();
         $listId = $data['listId'] ?? '';
+        $teamId = $data['teamId'] ?? '';
         $taskIds = $data['taskIds'] ?? [];
         $userId = Request::user()['id'];
 
-        if (empty($listId) || empty($taskIds)) {
-            return $this->json(['message' => 'List ID and task IDs are required'], 400);
+        if (empty($listId) || empty($teamId) || empty($taskIds)) {
+            return $this->json(['message' => 'List ID, Team ID and task IDs are required'], 400);
+        }
+
+        // Перевіряємо чи користувач є членом команди
+        $userTeamModel = new UserTeamModel();
+        if (!$userTeamModel->isUserInTeam($userId, $teamId)) {
+            return $this->json(['message' => 'Forbidden'], 403);
         }
 
         $listModel = new ListModel();
-        if (!$listModel->hasUserAccess($listId, $userId)) {
+        if (!$listModel->hasTeamAccess($listId, $teamId)) {
             return $this->json(['message' => 'Forbidden'], 403);
         }
 
@@ -314,17 +375,23 @@ class CustomDashboardController extends Controller
     {
         $data = Request::json();
         $dashboardId = $data['dashboardId'] ?? '';
+        $teamId = $data['teamId'] ?? '';
         $listIds = $data['listIds'] ?? [];
         $userId = Request::user()['id'];
 
-        if (empty($dashboardId) || empty($listIds)) {
-            return $this->json(['message' => 'Dashboard ID and list IDs are required'], 400);
+        if (empty($dashboardId) || empty($teamId) || empty($listIds)) {
+            return $this->json(['message' => 'Dashboard ID, Team ID and list IDs are required'], 400);
         }
 
-        $dashboardModel = new GroupFromUserModel();
+        $userTeamModel = new UserTeamModel();
+        if (!$userTeamModel->isUserInTeam($userId, $teamId)) {
+            return $this->json(['message' => 'Forbidden'], 403);
+        }
+
+        $dashboardModel = new GroupFromTeamModel();
         $dashboard = $dashboardModel->findById($dashboardId);
 
-        if (!$dashboard || $dashboard['user_id'] !== $userId) {
+        if (!$dashboard || $dashboard['team_id'] !== $teamId) {
             return $this->json(['message' => 'Forbidden'], 403);
         }
 

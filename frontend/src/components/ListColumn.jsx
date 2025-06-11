@@ -45,6 +45,7 @@ export default function ListColumn({
                     : null,
         },
     });
+
     const handleSubmit = (values) => {
         onAddTask({listId: list.id, ...values});
         form.reset();
@@ -52,7 +53,18 @@ export default function ListColumn({
     };
 
     return (
-        <Card shadow="sm" p="sm" radius="md" style={{minWidth: '24%', maxWidth: '50%', minHeight: '80vh'}}>
+        <Card
+            shadow="sm"
+            p="sm"
+            radius="md"
+            style={{
+                minWidth: '24%',
+                maxWidth: '50%',
+                height: '80vh',
+                display: 'flex',
+                flexDirection: 'column'
+            }}
+        >
             <Group justify="space-between" align="center" mb="sm">
                 <Group>
                     <IconList size={20}/>
@@ -60,12 +72,12 @@ export default function ListColumn({
                 </Group>
                 <Group gap={1} align="center">
                     <ActionIcon size="lg" variant="subtle" radius="lg"
-                        onClick={() => handleEditClick(list)}
+                                onClick={() => handleEditClick(list)}
                     >
                         <IconEdit size={20}/>
                     </ActionIcon>
                     <ActionIcon size="lg" variant="subtle" color="red" radius="lg"
-                        onClick={() => handleDeleteClick(list.id)}
+                                onClick={() => handleDeleteClick(list.id)}
                     >
                         <IconTrash size={20}/>
                     </ActionIcon>
@@ -75,11 +87,25 @@ export default function ListColumn({
                 </Group>
             </Group>
 
-            <ScrollArea style={{height: 'calc(100vh - 250px)'}}>
-                <Stack gap="sm" p={4}>
-                    {list.tasks?.map(task => (
-                        <TaskCard key={task.id} task={task} listId={list.id} onError={onError}/>
-                    ))}
+            <ScrollArea
+                style={{ flex: 1 }}
+                type="scroll"
+                scrollbarSize={6}
+                scrollHideDelay={500}
+            >
+                <Stack gap="sm" p="xs">
+                    {list.tasks?.slice()
+                        .sort((a, b) => {
+                            const isCompletedA = a.status === 'completed';
+                            const isCompletedB = b.status === 'completed';
+
+                            if (isCompletedA && !isCompletedB) return 1;
+                            if (!isCompletedA && isCompletedB) return -1;
+
+                            return Number(a.priority) - Number(b.priority);
+                        }).map(task => (
+                            <TaskCard key={task.id} task={task} listId={list.id} onError={onError}/>
+                        ))}
                 </Stack>
             </ScrollArea>
 

@@ -45,6 +45,9 @@ class TaskModel extends Model
     }
     public function updateById(string $id, array $data): bool
     {
+        if (empty($data)) {
+            return false;
+        }
         return $this->query()->where('id', '=', $id)->update($data);
     }
     public function reorderInList(string $listId, array $taskIds): bool

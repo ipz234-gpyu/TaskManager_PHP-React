@@ -7,11 +7,11 @@ const initialState = {
     error: null,
 };
 
-const customDashboardSlice = createSlice({
-    name: 'customDashboard',
+const teamDashboardSlice = createSlice({
+    name: 'teamDashboard',
     initialState,
     reducers: {
-        setCustomDashboard: (state, action) => {
+        setTeamDashboard: (state, action) => {
             state.dashboard = action.payload;
             state.error = null;
         },
@@ -112,7 +112,7 @@ const customDashboardSlice = createSlice({
 });
 
 export const {
-    setCustomDashboard,
+    setTeamDashboard,
     setLists,
     addList,
     updateList,
@@ -126,6 +126,6 @@ export const {
     setLoading,
     setError,
     clearError
-} = customDashboardSlice.actions;
+} = teamDashboardSlice.actions;
 
-export default customDashboardSlice.reducer;
+export default teamDashboardSlice.reducer;
