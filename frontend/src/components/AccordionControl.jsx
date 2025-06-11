@@ -3,10 +3,13 @@ import {
     Center,
     Accordion, Text, Group
 } from '@mantine/core';
-import { IconPlus, IconTrash, IconEdit } from '@tabler/icons-react';
+import { IconPlus, IconTrash, IconEdit, IconUsers } from '@tabler/icons-react';
 import React from "react";
+import { useNavigate } from "react-router-dom";
 
-export default function AccordionControl({text, addAction, deleteAction, editAction}) {
+export default function AccordionControl({text, addAction, deleteAction, editAction, navigateUrl}) {
+    const navigate = useNavigate();
+
     return (
         <Center>
             <Accordion.Control>
@@ -14,7 +17,6 @@ export default function AccordionControl({text, addAction, deleteAction, editAct
                     <Text size="xs" fw={500} c="dimmed">
                         {text}
                     </Text>
-
                 </Group>
             </Accordion.Control>
             {addAction &&
@@ -49,6 +51,17 @@ export default function AccordionControl({text, addAction, deleteAction, editAct
                     <IconTrash size={18}/>
                 </ActionIcon>
             }
+            {navigateUrl && (
+                <ActionIcon
+                    size="md"
+                    variant="subtle"
+                    radius="lg"
+                    color="violet"
+                    onClick={() => navigate(navigateUrl)}
+                >
+                    <IconUsers size={18} />
+                </ActionIcon>
+            )}
         </Center>
     );
 }

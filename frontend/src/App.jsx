@@ -19,8 +19,10 @@ import TodayDashboard from "./pages/dashboards/TodayDashboard.jsx";
 import UpcomingDashboard from "./pages/dashboards/UpcomingDashboard.jsx";
 import ImportantDashboard from "./pages/dashboards/ImportantDashboard.jsx";
 import CustomDashboard from "./pages/CustomDashboard.jsx";
-import TeamDashboard from "./pages/TeamDashboard.jsx";
+import TeamDashboardPage from "./pages/TeamDashboardPage.jsx";
+import TeamMembersPage from "./pages/TeamMembersPage.jsx";
 import SettingsPage from "./pages/SettingsPage.jsx";
+import TeamInvitationPage from "./pages/TeamInvitationPage.jsx";
 
 function App() {
     const router = createBrowserRouter(
@@ -28,18 +30,20 @@ function App() {
             <Route path="/">
                 <Route index element={<Navigate to="dashboard/today" replace/>}/>
 
-                    <Route element={<RequireAuth/>}>
-                        <Route element={<RootLayout/>}>
+                <Route element={<RequireAuth/>}>
+                    <Route element={<RootLayout/>}>
                         <Route path="dashboard">
                             <Route path="today" element={<TodayDashboard/>}/>
                             <Route path="upcoming" element={<UpcomingDashboard/>}/>
-                            <Route path="important" element={<ImportantDashboard />}/>
+                            <Route path="important" element={<ImportantDashboard/>}/>
 
                             <Route path="custom/:dashboardId" element={<CustomDashboard/>}/>
-                            <Route path="team/:teamId/:dashboardId" element={<TeamDashboard/>}/>
+                            <Route path="team/:teamId/:dashboardId" element={<TeamDashboardPage/>}/>
+                            <Route path="team-members/:teamId" element={<TeamMembersPage/>}/>
+                            <Route path="team-invitation/:token" element={<TeamInvitationPage/>}/>
                         </Route>
 
-                        <Route path="settings" element={<SettingsPage />} />
+                        <Route path="settings" element={<SettingsPage/>}/>
                     </Route>
                 </Route>
 

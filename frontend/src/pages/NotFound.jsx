@@ -8,9 +8,12 @@ import {
     Paper,
 } from '@mantine/core';
 import { useNavigate } from 'react-router-dom';
+import { useDispatch } from "react-redux";
+import { setActiveTab } from "../features/dashboards/dashboardsSlice.js";
 
 export default function NotFound() {
     const navigate = useNavigate();
+    const dispatch = useDispatch();
 
     return (
         <Container size="lg" my={120}>
@@ -24,7 +27,10 @@ export default function NotFound() {
                         address.
                     </Text>
                     <Group mt="xl">
-                        <Button size="md" variant="filled" color="blue" onClick={() => navigate('/dashboard/today')}>
+                        <Button size="md" variant="filled" color="blue" onClick={() => {
+                            navigate('/dashboard/today');
+                            dispatch(setActiveTab('today'));
+                        }}>
                             Go back to Home
                         </Button>
                     </Group>

@@ -153,9 +153,6 @@ export default function SettingsPage() {
         const formData = new FormData();
         formData.append('avatar', file);
 
-        console.log('File:', file);
-        console.log('FormData entries:', Array.from(formData.entries()));
-
         try {
             await uploadAvatar(formData).unwrap();
             notifications.show({

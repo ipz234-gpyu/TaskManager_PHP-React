@@ -29,7 +29,7 @@ import DashboardHeader from "../components/DashboardHeader.jsx";
 import { useDisclosure } from "@mantine/hooks";
 import { setActiveTab } from "../features/dashboards/dashboardsSlice.js";
 
-export default function TeamDashboard() {
+export default function TeamDashboardPage() {
     const { teamId, dashboardId } = useParams();
     const dispatch = useDispatch();
     const navigate = useNavigate();
@@ -180,7 +180,6 @@ export default function TeamDashboard() {
                             handleDeleteClick={handleDeleteClick}
                             onAddTask={addTaskHandle}
                             onError={setError}
-                            // Task handlers
                             onTaskStatusToggle={(taskId, newStatus) => handleTaskStatusToggle(list.id, taskId, newStatus)}
                             onTaskDelete={(taskId) => handleTaskDelete(list.id, taskId)}
                             onTaskUpdate={(taskId, updatedTask) => handleTaskUpdate(list.id, taskId, updatedTask)}

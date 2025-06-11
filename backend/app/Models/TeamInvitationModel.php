@@ -28,6 +28,42 @@ class TeamInvitationModel extends Model
             ->where('team_id', '=', $teamId)
             ->first();
     }
+    public function findByIdWithUserInfo(string $id): ?array
+    {
+        return $this->query()
+            ->select([
+                'ti.id',
+                'ti.expires_at',
+                'ti.team_id',
+                'ti.user_id',
+                'u.name',
+                'u.surname',
+                'u.email',
+                'u.avatar'
+            ])
+            ->join('users as u', 'ti.user_id = u.id')
+            ->where('ti.id', '=', $id)
+            ->first();
+    }
+    public function findByTeamIdWithUserInfo(string $teamId): array
+    {
+        return $this->query()
+            ->select([
+                'ti.id',
+                'ti.expires_at',
+                'ti.team_id',
+                'ti.user_id',
+                'u.name',
+                'u.surname',
+                'u.email',
+                'u.avatar'
+            ])
+            ->join('users as u', 'ti.user_id = u.id')
+            ->where('ti.team_id', '=', $teamId)
+            ->where('ti.expires_at', '>', date('Y-m-d H:i:s'))
+            ->groupBy('ti.id')
+            ->get();
+    }
     public function findByUserId(string $userId): array
     {
         return $this->query()->where('user_id', '=', $userId)->get();

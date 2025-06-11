@@ -3,11 +3,23 @@
 namespace App\Models;
 
 use App\Core\Model;
+use App\Helpers\UrlHelper;
 
 class UserModel extends Model
 {
     protected string $table = 'users';
     protected string $alias = 'u';
+
+    public static function formatBasicUser(array $user): array
+    {
+        return [
+            'id' => $user['id'],
+            'name' => $user['name'],
+            'surname' => $user['surname'],
+            'email' => $user['email'],
+            'avatar' => UrlHelper::formatUserAvatar($user['avatar']),
+        ];
+    }
 
     public function create(array $data): bool
     {
@@ -24,6 +36,14 @@ class UserModel extends Model
     public function findAll(): array
     {
         return $this->query()->get();
+    }
+    public function findAllByTeamId(string $teamId): array
+    {
+        return $this->query()
+            ->select(['u.*'])
+            ->join('user_teams ut', 'ut.user_id = u.id')
+            ->where('ut.team_id', '=', $teamId)
+            ->get();
     }
     public function updateById(string $id, array $data): bool
     {

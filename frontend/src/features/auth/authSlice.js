@@ -34,6 +34,7 @@ const authSlice = createSlice({
             state.authenticating = false;
 
             deleteCookie('refreshToken');
+            window.location.reload();
         },
         setAuthenticating: (state, action) => {
             state.authenticating = action.payload;

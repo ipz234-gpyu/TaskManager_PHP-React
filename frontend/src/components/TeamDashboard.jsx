@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Accordion, Button, Modal, Stack, TextInput, Group } from "@mantine/core";
+import { Accordion, Button, Modal, Stack, TextInput, Group, ActionIcon } from "@mantine/core";
 import AccordionControl from "./AccordionControl.jsx";
 import AccordionPanelDB from "./AccordionPanelDB.jsx";
 import { useDispatch, useSelector } from "react-redux";
@@ -15,7 +15,7 @@ import {
 import { useDisclosure } from "@mantine/hooks";
 import { useForm } from "@mantine/form";
 import { useNavigate } from "react-router-dom";
-import { IconPlus } from "@tabler/icons-react";
+import { IconPlus, IconSettings } from "@tabler/icons-react";
 
 export default function TeamDashboard({setError}) {
     const dispatch = useDispatch();
@@ -266,6 +266,7 @@ export default function TeamDashboard({setError}) {
                                         addAction={() => handleAddDashboardClick(team.id)}
                                         deleteAction={team.isAdmin ? () => handleDeleteTeamClick(team) : undefined}
                                         editAction={team.isAdmin ? () => handleEditTeamClick(team) : undefined}
+                                        navigateUrl={team.isAdmin ? `dashboard/team-members/${team.id}` : undefined}
                                     />
 
                                     <AccordionPanelDB

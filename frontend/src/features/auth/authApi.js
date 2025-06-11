@@ -74,6 +74,8 @@ export const authApi = createApi({
             }),
             async onQueryStarted(_, {dispatch, queryFulfilled}) {
                 try {
+                    const { data } = await queryFulfilled;
+                    if (data.status === 'success')
                     dispatch(logout());
                 } catch {
                 }

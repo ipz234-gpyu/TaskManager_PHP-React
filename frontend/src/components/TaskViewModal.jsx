@@ -42,7 +42,7 @@ export default function TaskViewModal({
                         size="md"
                         color="green"
                     />
-                    <Text fw={600} size="lg">{task.title}</Text>
+                    <Text fw={700} size="xl">{task.title}</Text>
                 </Group>
             }
             size="lg"
@@ -51,29 +51,25 @@ export default function TaskViewModal({
             <ScrollArea style={{ maxHeight: '70vh' }}>
                 <Stack gap="md">
                     {task.description && (
-                        <Box>
-                            <Text size="sm" fw={500} mb="xs">Description</Text>
-                            <Text size="sm" c="dimmed">{task.description}</Text>
-                        </Box>
+                        <Group>
+                            <Text size="xl">Description:</Text>
+                            <Text size="xl" c="dimmed">{task.description}</Text>
+                        </Group>
                     )}
 
                     <Group grow>
-                        <Box>
-                            <Text size="sm" fw={500} mb="xs">Status</Text>
-                            <Badge color={getStatusColor(task.status)} variant="light">
+                        <Group>
+                            <Text size="xl">Status:</Text>
+                            <Badge size="lg" color={`${getStatusColor(task.status)}`}>
                                 {getStatusLabel(task.status)}
                             </Badge>
-                        </Box>
-                        <Box>
-                            <Text size="sm" fw={500} mb="xs">Priority</Text>
-                            <Badge
-                                color={getPriorityColor(task.priority)}
-                                variant="light"
-                                leftSection={<IconFlag size={12} />}
-                            >
+                        </Group>
+                        <Group >
+                            <Text size="xl">Priority:</Text>
+                            <Badge size="lg" color={getPriorityColor(task.priority)}>
                                 {getPriorityLabel(task.priority)}
                             </Badge>
-                        </Box>
+                        </Group>
                     </Group>
 
                     {(task.start_time || task.deadline || task.notification) && (
