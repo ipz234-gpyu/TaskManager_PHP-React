@@ -10,7 +10,8 @@ import {
     deleteTask,
     moveTask,
     reorderTasks,
-    reorderLists
+    reorderLists,
+    setTags, addTagToTask, removeTagFromTask, addTag, updateTag, deleteTag
 } from './customDashboardSlice.js';
 import { baseQueryWithReauth } from './../baseApi';
 import { updateCustomDashboard } from "../dashboards/dashboardsSlice.js";
@@ -228,6 +229,100 @@ export const customDashboardApi = createApi({
                 }
             },
         }),
+
+        getTags: builder.query({
+            query: () => ({
+                url: '/task/getTags',
+                method: 'GET',
+            }),
+            async onQueryStarted(_, {dispatch, queryFulfilled}) {
+                try {
+                    const {data} = await queryFulfilled;
+                    dispatch(setTags(data.data.tags));
+                } catch (error) {
+                    console.error('Error loading tags:', error);
+                }
+            },
+        }),
+        removeTagFromTask: builder.mutation({
+            query: (credentials) => ({
+                url: '/task/removeTagFromTask',
+                method: 'POST',
+                body: JSON.stringify(credentials)
+            }),
+            async onQueryStarted(_, {dispatch, queryFulfilled}) {
+                try {
+                    const {data} = await queryFulfilled;
+                    dispatch(removeTagFromTask(data.data));
+                } catch (error) {
+                    console.error('Error deleting task:', error);
+                }
+            },
+        }),
+        addTagToTask: builder.mutation({
+            query: (credentials) => ({
+                url: '/task/addTagToTask',
+                method: 'POST',
+                body: JSON.stringify(credentials)
+            }),
+            async onQueryStarted(_, {dispatch, queryFulfilled}) {
+                try {
+                    const {data} = await queryFulfilled;
+                    dispatch(addTagToTask(data.data));
+                } catch (error) {
+                    console.error('Error deleting task:', error);
+                }
+            },
+        }),
+        createTag: builder.mutation({
+            query: (credentials) => ({
+                url: '/task/createTag',
+                method: 'POST',
+                body: JSON.stringify(credentials)
+            }),
+            async onQueryStarted(_, {dispatch, queryFulfilled}) {
+                try {
+                    const {data} = await queryFulfilled;
+                    dispatch(addTag(data.data.tag));
+                } catch (error) {
+                    console.error('Error creating tag:', error);
+                }
+            },
+        }),
+        updateTag: builder.mutation({
+            query: (credentials) => ({
+                url: '/task/updateTag',
+                method: 'PUT',
+                body: JSON.stringify(credentials)
+            }),
+            async onQueryStarted(arg, {dispatch, queryFulfilled}) {
+                try {
+                    const {data} = await queryFulfilled;
+                    dispatch(updateTag({
+                        id: arg.tagId,
+                        ...data.data.tag
+                    }));
+                } catch (error) {
+                    console.error('Error updating tag:', error);
+                }
+            },
+        }),
+        deleteTag: builder.mutation({
+            query: (credentials) => ({
+                url: '/task/deleteTag',
+                method: 'DELETE',
+                body: JSON.stringify(credentials)
+            }),
+            async onQueryStarted(arg, {dispatch, queryFulfilled}) {
+                try {
+                    const {data} = await queryFulfilled;
+                    dispatch(deleteTag(data.data.deletedId));
+                } catch (error) {
+                    console.error('Error deleting tag:', error);
+                }
+            },
+        }),
+
     })
 });
 
@@ -241,5 +336,11 @@ export const {
     useDeleteTaskFromListMutation,
     useMoveTaskBetweenListsMutation,
     useReorderTasksInListMutation,
-    useReorderListsInDashboardMutation
+    useReorderListsInDashboardMutation,
+    useLazyGetTagsQuery,
+    useRemoveTagFromTaskMutation,
+    useAddTagToTaskMutation,
+    useCreateTagMutation,
+    useUpdateTagMutation,
+    useDeleteTagMutation,
 } = customDashboardApi;

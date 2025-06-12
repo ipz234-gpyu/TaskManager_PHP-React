@@ -9,6 +9,7 @@ use App\Models\ListModel;
 use App\Models\TaskListModel;
 use App\Models\TaskModel;
 use App\Models\GroupListFromUserModel;
+use App\Models\TaskTagModel;
 use Ramsey\Uuid\Uuid;
 
 class CustomDashboardController extends Controller
@@ -194,6 +195,7 @@ class CustomDashboardController extends Controller
         $taskModel->attachToList($taskId, $listId);
 
         $task = $taskModel->findById($taskId);
+        $task['tags'] = [];
 
         return $this->json([
             'listId' => $listId,
@@ -224,8 +226,9 @@ class CustomDashboardController extends Controller
             return $this->json(['message' => 'Task not found'], 404);
         }
 
-        $taskModel->updateById($taskId, $data['task']);
+        $taskModel->updateById($taskId, array_diff_key($data['task'], ['tags' => '']));
         $updatedTask = $taskModel->findById($taskId);
+        $updatedTask['tags'] = (new TaskTagModel())->findTagsByTaskId($taskId);
 
         return $this->json([
             'listId' => $listId,

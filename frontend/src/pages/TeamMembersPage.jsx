@@ -43,18 +43,18 @@ import {
 } from "../features/menageTeam/menageTeamApi.js";
 
 export default function TeamMembersPage() {
-    const { teamId } = useParams();
+    const {teamId} = useParams();
     const dispatch = useDispatch();
     const navigate = useNavigate();
 
-    const { team, members, invitations } = useSelector(state => state.menageTeam);
+    const {team, members, invitations} = useSelector(state => state.menageTeam);
 
-    const [getTeam, { isLoading: isTeamLoading }] = useGetTeamMutation();
-    const [inviteUser, { isLoading: isInviteLoading }] = useInviteUserMutation();
-    const [kickMember, { isLoading: isKickLoading }] = useKickMemberMutation();
-    const [revokeInvitation, { isLoading: isRevokeLoading }] = useRevokeInvitationMutation();
+    const [getTeam, {isLoading: isTeamLoading}] = useGetTeamMutation();
+    const [inviteUser, {isLoading: isInviteLoading}] = useInviteUserMutation();
+    const [kickMember, {isLoading: isKickLoading}] = useKickMemberMutation();
+    const [revokeInvitation, {isLoading: isRevokeLoading}] = useRevokeInvitationMutation();
 
-    const [confirmModalOpened, { open: openConfirmModal, close: closeConfirmModal }] = useDisclosure(false);
+    const [confirmModalOpened, {open: openConfirmModal, close: closeConfirmModal}] = useDisclosure(false);
     const [confirmAction, setConfirmAction] = useState(null);
     const [isInviting, setIsInviting] = useState(false);
 
@@ -99,7 +99,7 @@ export default function TeamMembersPage() {
                 title: 'Success',
                 message: 'Invitation sent successfully!',
                 color: 'green',
-                icon: <IconCheck size={16} />
+                icon: <IconCheck size={16}/>
             });
 
             form.reset();
@@ -108,7 +108,7 @@ export default function TeamMembersPage() {
                 title: 'Error',
                 message: error?.data?.message || 'Failed to send invitation',
                 color: 'red',
-                icon: <IconAlertCircle size={16} />
+                icon: <IconAlertCircle size={16}/>
             });
         } finally {
             setIsInviting(false);
@@ -126,14 +126,14 @@ export default function TeamMembersPage() {
                 title: 'Success',
                 message: 'Member removed from team',
                 color: 'green',
-                icon: <IconCheck size={16} />
+                icon: <IconCheck size={16}/>
             });
         } catch (error) {
             notifications.show({
                 title: 'Error',
                 message: error?.data?.message || 'Failed to remove member',
                 color: 'red',
-                icon: <IconAlertCircle size={16} />
+                icon: <IconAlertCircle size={16}/>
             });
         }
     };
@@ -149,20 +149,20 @@ export default function TeamMembersPage() {
                 title: 'Success',
                 message: 'Invitation revoked',
                 color: 'orange',
-                icon: <IconCheck size={16} />
+                icon: <IconCheck size={16}/>
             });
         } catch (error) {
             notifications.show({
                 title: 'Error',
                 message: error?.data?.message || 'Failed to revoke invitation',
                 color: 'red',
-                icon: <IconAlertCircle size={16} />
+                icon: <IconAlertCircle size={16}/>
             });
         }
     };
 
     const openConfirmAction = (action, title, message, onConfirm) => {
-        setConfirmAction({ title, message, onConfirm });
+        setConfirmAction({title, message, onConfirm});
         openConfirmModal();
     };
 
@@ -185,14 +185,14 @@ export default function TeamMembersPage() {
     if (isTeamLoading) {
         return (
             <Center className="h-screen">
-                <Loader color="blue" size="xl" variant="dots" />
+                <Loader color="blue" size="xl" variant="dots"/>
             </Center>
         );
     }
 
     if (!team) {
         return (
-            <Center style={{ height: '50vh' }}>
+            <Center style={{height: '50vh'}}>
                 <Text>Team not found</Text>
             </Center>
         );
@@ -201,60 +201,60 @@ export default function TeamMembersPage() {
     return (
         <Container size="xl" py="xl">
             <Stack gap="xl">
-                {/* Header */}
-                <Box>
-                    <Title order={1} mb="sm">
-                        <Group gap="sm">
-                            <IconUsers size={32} />
-                            Manage Team: {team.name}
-                        </Group>
-                    </Title>
-                    <Text c="dimmed" size="lg">
-                        Invite new members and manage your team
-                    </Text>
-                </Box>
-
-                {/* Invite Form */}
-                <Paper shadow="sm" p="xl" radius="md">
-                    <Title order={2} mb="lg">
-                        <Group gap="sm">
-                            <IconMail size={24} />
-                            Send Invitation
-                        </Group>
-                    </Title>
-
+                <Group justify="space-between">
                     <Box>
-                        <Flex gap="md" align="end">
-                            <TextInput
-                                label="Email Address"
-                                placeholder="Enter email address"
-                                {...form.getInputProps('email')}
-                                style={{ flexGrow: 1 }}
-                                leftSection={<IconMail size={16} />}
-                                onKeyDown={(e) => {
-                                    if (e.key === 'Enter') {
-                                        e.preventDefault();
+                        <Title order={1} mb="sm">
+                            <Group gap="sm">
+                                <IconUsers size={32}/>
+                                Manage Team: {team.name}
+                            </Group>
+                        </Title>
+                        <Text c="dimmed" size="lg">
+                            Invite new members and manage your team
+                        </Text>
+                    </Box>
+
+                    <Paper shadow="sm" p="xl" radius="md">
+                        <Title order={2} mb="lg">
+                            <Group gap="sm">
+                                <IconMail size={24}/>
+                                Send Invitation
+                            </Group>
+                        </Title>
+
+                        <Box>
+                            <Flex gap="md" align="end">
+                                <TextInput
+                                    label="Email Address"
+                                    placeholder="Enter email address"
+                                    {...form.getInputProps('email')}
+                                    style={{flexGrow: 1}}
+                                    leftSection={<IconMail size={16}/>}
+                                    onKeyDown={(e) => {
+                                        if (e.key === 'Enter') {
+                                            e.preventDefault();
+                                            if (form.isValid()) {
+                                                handleInviteUser(form.values);
+                                            }
+                                        }
+                                    }}
+                                />
+                                <Button
+                                    onClick={() => {
                                         if (form.isValid()) {
                                             handleInviteUser(form.values);
                                         }
-                                    }
-                                }}
-                            />
-                            <Button
-                                onClick={() => {
-                                    if (form.isValid()) {
-                                        handleInviteUser(form.values);
-                                    }
-                                }}
-                                loading={isInviting || isInviteLoading}
-                                leftSection={<IconSend size={16} />}
-                                disabled={!form.isValid()}
-                            >
-                                Send Invite
-                            </Button>
-                        </Flex>
-                    </Box>
-                </Paper>
+                                    }}
+                                    loading={isInviting || isInviteLoading}
+                                    leftSection={<IconSend size={16}/>}
+                                    disabled={!form.isValid()}
+                                >
+                                    Send Invite
+                                </Button>
+                            </Flex>
+                        </Box>
+                    </Paper>
+                </Group>
 
                 {/* Team Members */}
                 <Paper shadow="sm" p="xl" radius="md">
@@ -316,7 +316,7 @@ export default function TeamMembersPage() {
                                                     )}
                                                     loading={isKickLoading}
                                                 >
-                                                    <IconUserMinus size={16} />
+                                                    <IconUserMinus size={16}/>
                                                 </ActionIcon>
                                             )}
                                         </Table.Td>
@@ -325,7 +325,7 @@ export default function TeamMembersPage() {
                             </Table.Tbody>
                         </Table>
                     ) : (
-                        <Alert icon={<IconUsers size={16} />} color="blue">
+                        <Alert icon={<IconUsers size={16}/>} color="blue">
                             No team members found
                         </Alert>
                     )}
@@ -375,7 +375,7 @@ export default function TeamMembersPage() {
                                             <Badge
                                                 color={isExpired(invitation.expires_at) ? 'red' : 'orange'}
                                                 variant="light"
-                                                leftSection={<IconClock size={12} />}
+                                                leftSection={<IconClock size={12}/>}
                                             >
                                                 {isExpired(invitation.expires_at) ? 'Expired' : 'Pending'}
                                             </Badge>
@@ -400,7 +400,7 @@ export default function TeamMembersPage() {
                                                 )}
                                                 loading={isRevokeLoading}
                                             >
-                                                <IconTrash size={16} />
+                                                <IconTrash size={16}/>
                                             </ActionIcon>
                                         </Table.Td>
                                     </Table.Tr>
@@ -408,7 +408,7 @@ export default function TeamMembersPage() {
                             </Table.Tbody>
                         </Table>
                     ) : (
-                        <Alert icon={<IconMail size={16} />} color="blue">
+                        <Alert icon={<IconMail size={16}/>} color="blue">
                             No pending invitations
                         </Alert>
                     )}

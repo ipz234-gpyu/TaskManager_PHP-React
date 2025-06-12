@@ -27,6 +27,8 @@ export default function ListColumn({
                                        onTaskStatusToggle,
                                        onTaskDelete,
                                        onTaskUpdate,
+                                       renderChild,
+                                       renderOptionalChild
                                    }) {
     const [opened, {open, close}] = useDisclosure(false);
 
@@ -91,7 +93,7 @@ export default function ListColumn({
             </Group>
 
             <ScrollArea
-                style={{ flex: 1 }}
+                style={{flex: 1}}
                 type="scroll"
                 scrollbarSize={6}
                 scrollHideDelay={500}
@@ -115,6 +117,8 @@ export default function ListColumn({
                                 onStatusToggle={onTaskStatusToggle}
                                 onDelete={onTaskDelete}
                                 onUpdate={onTaskUpdate}
+                                children={renderChild(task)}
+                                OptionalChild={renderOptionalChild(task)}
                             />
                         ))}
                 </Stack>

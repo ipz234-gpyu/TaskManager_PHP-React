@@ -6,7 +6,7 @@ import {
     ActionIcon,
     Badge,
     Stack,
-    Checkbox,
+    Checkbox, Box,
 } from '@mantine/core';
 import {
     IconEdit,
@@ -27,7 +27,9 @@ export default function TaskCard({
                                      onError,
                                      onStatusToggle,
                                      onDelete,
-                                     onUpdate
+                                     onUpdate,
+                                     children,
+                                     OptionalChild
                                  }) {
     const [viewModalOpened, {open: openViewModal, close: closeViewModal}] = useDisclosure(false);
     const [editModalOpened, {open: openEditModal, close: closeEditModal}] = useDisclosure(false);
@@ -173,6 +175,12 @@ export default function TaskCard({
                                     </Badge>
                                 )}
                             </Group>
+
+                            {children &&
+                                <Box>
+                                    {children}
+                                </Box>
+                            }
                         </Stack>
                     </Group>
 
@@ -201,6 +209,7 @@ export default function TaskCard({
                 onDelete={handleDelete}
                 onStatusToggle={handleStatusToggle}
                 onError={onError}
+                OptionalChild={OptionalChild}
             />
 
             <TaskEditModal

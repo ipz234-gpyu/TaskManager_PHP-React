@@ -38,6 +38,10 @@ class ListModel extends Model
 
         foreach ($lists as &$list){
             $list['tasks'] = (new TaskModel())->findByListId($list['id']);
+
+            foreach ($list['tasks'] as &$task){
+                $task['tags'] = (new TaskTagModel())->findTagsByTaskId($task['id']);
+            }
         }
 
         return $lists;
@@ -52,6 +56,10 @@ class ListModel extends Model
         if ($list) {
             $taskModel = new TaskModel();
             $list['tasks'] = $taskModel->findByListId($listId);
+
+            foreach ($list['tasks'] as &$task){
+                $task['tags'] = (new TaskTagModel())->findTagsByTaskId($task['id']);
+            }
         }
 
         return $list;

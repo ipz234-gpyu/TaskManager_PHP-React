@@ -7,7 +7,7 @@ import {
     Alert,
     Loader,
     Center,
-    Modal, TextInput
+    Modal, TextInput, Stack
 } from '@mantine/core';
 import {
     IconAlertCircle,
@@ -21,12 +21,15 @@ import {
     useUpdateListInDashboardMutation,
     useAddTaskToListMutation,
     useUpdateTaskInListMutation,
-    useDeleteTaskFromListMutation
+    useDeleteTaskFromListMutation,
+    useLazyGetTagsQuery,
 } from '../features/customDashboard/customDashboardApi';
 import ListColumn from '../components/ListColumn.jsx';
 import DashboardHeader from "../components/DashboardHeader.jsx";
 import { useDisclosure } from "@mantine/hooks";
 import { setActiveTab } from "../features/dashboards/dashboardsSlice.js";
+import TagComponent from "../components/TagComponent.jsx";
+import TagSelectionListComponent from "../components/TagSelectionListComponent.jsx";
 
 export default function TodoDashboard() {
     const {dashboardId} = useParams();
@@ -35,6 +38,7 @@ export default function TodoDashboard() {
     const lists = useSelector(state => state.customDashboard.lists);
     const dashboard = useSelector(state => state.customDashboard.dashboard);
     const [getDashboard, {isLoading, error: loadError}] = useGetCustomDashboardMutation();
+    const [triggerGetTags] = useLazyGetTagsQuery();
 
     const [deleteOpened, {open: openDelete, close: closeDelete}] = useDisclosure(false);
     const [editOpened, {open: openEdit, close: closeEdit}] = useDisclosure(false);
@@ -49,13 +53,19 @@ export default function TodoDashboard() {
     const [deleteTask] = useDeleteTaskFromListMutation();
 
     const addListHandle = async (values) => {
-        try { await addList({ dashboardId: dashboard.id, ...values}); }
-        catch { setError('Add list failed'); }
+        try {
+            await addList({dashboardId: dashboard.id, ...values});
+        } catch {
+            setError('Add list failed');
+        }
     };
 
     const addTaskHandle = async (values) => {
-        try { await addTask(values); }
-        catch { setError('Add task failed'); }
+        try {
+            await addTask(values);
+        } catch {
+            setError('Add task failed');
+        }
     };
 
     const handleTaskStatusToggle = async (listId, taskId, newStatus) => {
@@ -91,8 +101,11 @@ export default function TodoDashboard() {
     const updateListHandle = async () => {
         if (!editedList || !editedName.trim()) return;
 
-        try { await updateList({ listId: editedList, name: editedName}); }
-        catch { setError('Update list failed'); }
+        try {
+            await updateList({listId: editedList, name: editedName});
+        } catch {
+            setError('Update list failed');
+        }
         closeEdit();
     };
 
@@ -104,8 +117,11 @@ export default function TodoDashboard() {
     const deleteListHandle = async () => {
         if (!listToDelete) return;
         closeDelete();
-        try { await deleteList({ listId: listToDelete}); }
-        catch { setError('Delete list failed'); }
+        try {
+            await deleteList({listId: listToDelete});
+        } catch {
+            setError('Delete list failed');
+        }
     };
 
     const [error, setError] = useState(null);
@@ -119,17 +135,35 @@ export default function TodoDashboard() {
         const fetchDashboard = async () => {
             try {
                 await getDashboard(dashboardId).unwrap();
+                await triggerGetTags().unwrap();
                 dispatch(setActiveTab(dashboardId));
+            } catch {
+                navigate('/not-found');
             }
-            catch { navigate('/not-found'); }
         };
 
         fetchDashboard();
     }, [dashboardId]);
 
+    const renderChild = (task) => {
+        return (
+            <Group wrap gap="xs">
+                {task?.tags?.map(tag => (
+                    <TagComponent tag={tag} key={tag.id} />
+                    ))}
+            </Group>
+        );
+    };
+
+    const renderOptionalChild = (task) => {
+        return (
+            <TagSelectionListComponent task={task}/>
+        );
+    };
+
     if (isLoading) return (
         <Center className="h-screen">
-            <Loader color="blue" size="xl" variant="dots" />
+            <Loader color="blue" size="xl" variant="dots"/>
         </Center>
     );
     if (loadError || error) return <Alert icon={<IconAlertCircle/>} color="red">{error || loadError.message}</Alert>;
@@ -145,7 +179,7 @@ export default function TodoDashboard() {
             />
 
             <ScrollArea style={{height: '80vh'}}>
-                <Group spacing="md" grow wrap="nowrap" >
+                <Group spacing="md" grow wrap="nowrap">
                     {lists.map(list => (
                         <ListColumn
                             key={list.id}
@@ -158,6 +192,9 @@ export default function TodoDashboard() {
                             onTaskStatusToggle={(taskId, newStatus) => handleTaskStatusToggle(list.id, taskId, newStatus)}
                             onTaskDelete={(taskId) => handleTaskDelete(list.id, taskId)}
                             onTaskUpdate={(taskId, updatedTask) => handleTaskUpdate(list.id, taskId, updatedTask)}
+
+                            renderChild={renderChild}
+                            renderOptionalChild={renderOptionalChild}
                         />
                     ))}
                 </Group>

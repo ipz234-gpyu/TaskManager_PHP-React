@@ -3,6 +3,7 @@ import { createSlice } from '@reduxjs/toolkit';
 const initialState = {
     dashboard: null,
     lists: [],
+    tags: [],
     loading: false,
     error: null,
 };
@@ -17,6 +18,9 @@ const customDashboardSlice = createSlice({
         },
         setLists: (state, action) => {
             state.lists = action.payload;
+        },
+        setTags: (state, action) => {
+            state.tags = action.payload;
         },
         addList: (state, action) => {
             state.lists.push(action.payload);
@@ -107,7 +111,54 @@ const customDashboardSlice = createSlice({
         },
         clearError: (state) => {
             state.error = null;
-        }
+        },
+        addTagToTask: (state, action) => {
+            const {taskId, tag} = action.payload;
+
+            state.lists.forEach(list => {
+                const task = list.tasks?.find(t => t.id === taskId);
+                if (task) {
+                    task.tags = task.tags || [];
+                    if (!task.tags.some(t => t.id === tag.id)) {
+                        task.tags.push(tag);
+                    }
+                }
+            });
+        },
+        removeTagFromTask: (state, action) => {
+            const { taskId, tagId } = action.payload;
+
+            state.lists.forEach(list => {
+                const task = list.tasks?.find(t => t.id === taskId);
+                if (task && task.tags) {
+                    task.tags = task.tags.filter(tag => tag.id !== tagId);
+                }
+            });
+        },
+        addTag: (state, action) => {
+            state.tags.push(action.payload);
+        },
+        updateTag: (state, action) => {
+            const {id, ...updates} = action.payload;
+            const tagIndex = state.tags.findIndex(tag => tag.id === id);
+            if (tagIndex !== -1) {
+                state.tags[tagIndex] = {...state.tags[tagIndex], ...updates};
+            }
+        },
+        deleteTag: (state, action) => {
+            const tagId = action.payload;
+            state.tags = state.tags.filter(tag => tag.id !== tagId);
+
+            state.lists.forEach(list => {
+                if (list.tasks) {
+                    list.tasks.forEach(task => {
+                        if (task.tags) {
+                            task.tags = task.tags.filter(tag => tag.id !== tagId);
+                        }
+                    });
+                }
+            });
+        },
     }
 });
 
@@ -125,7 +176,13 @@ export const {
     reorderLists,
     setLoading,
     setError,
-    clearError
+    clearError,
+    setTags,
+    addTagToTask,
+    removeTagFromTask,
+    addTag,
+    updateTag,
+    deleteTag,
 } = customDashboardSlice.actions;
 
 export default customDashboardSlice.reducer;

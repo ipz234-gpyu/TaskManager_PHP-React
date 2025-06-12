@@ -69,7 +69,7 @@ class UserModel extends Model
         $groupFromUserModel = new GroupFromUserModel();
         $groupFromUserModel->deleteByUserId($id);
 
-        $tagModel = new TagModel();
+        $tagModel = new TagsModel();
         $tagModel->deleteByUserId($id);
 
         $teamModel = new TeamModel();

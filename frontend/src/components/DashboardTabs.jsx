@@ -8,7 +8,7 @@ import {
 import {
     IconCalendar,
     IconCalendarUp,
-    IconStar,
+    IconTag,
 } from '@tabler/icons-react';
 
 import { DashboardItem } from './DashboardItem.jsx';
@@ -30,10 +30,9 @@ function DashboardTabs() {
             count: 12
         },
         {
-            id: 'important',
-            name: 'Important',
-            icon: IconStar,
-            count: 3
+            id: 'tag-management',
+            name: 'Tag management',
+            icon: IconTag,
         },
     ];
     const [error, setError] = useState('');

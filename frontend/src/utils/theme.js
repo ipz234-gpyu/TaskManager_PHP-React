@@ -357,71 +357,6 @@ export const darkTheme = createTheme({
             })
         },
 
-        // Button
-        Button: {
-            styles: (theme) => ({
-                root: {
-                    '&[data-variant="light"]': {
-                        backgroundColor: theme.colors.dark[5],
-                        color: theme.colors.dark[0],
-                        border: `1px solid ${theme.colors.dark[4]}`,
-                        '&:hover': {
-                            backgroundColor: theme.colors.dark[4],
-                            borderColor: theme.colors.dark[3],
-                        }
-                    },
-                    '&[data-variant="subtle"]': {
-                        backgroundColor: 'transparent',
-                        color: theme.colors.dark[1],
-                        '&:hover': {
-                            backgroundColor: theme.colors.dark[5],
-                            color: theme.colors.dark[0],
-                        }
-                    },
-                    '&[data-size="xs"]': {
-                        height: '28px',
-                        paddingLeft: '8px',
-                        paddingRight: '8px',
-                        fontSize: '12px',
-                    },
-                    // Для кнопки Settings
-                    '&[data-settings-button]': {
-                        justifyContent: 'flex-start',
-                        width: '100%',
-                        padding: '8px 12px',
-                        backgroundColor: 'transparent',
-                        color: theme.colors.dark[1],
-                        '&:hover': {
-                            backgroundColor: theme.colors.dark[5],
-                            color: theme.colors.dark[0],
-                        }
-                    }
-                }
-            })
-        },
-
-        // Badge
-        Badge: {
-            styles: (theme) => ({
-                root: {
-                    backgroundColor: theme.colors.blue[6],
-                    color: theme.white,
-                    fontSize: '11px',
-                    fontWeight: 600,
-                    padding: '2px 6px',
-                    '&[data-variant="light"]': {
-                        backgroundColor: theme.colors.blue[9],
-                        color: theme.colors.blue[2],
-                    },
-                    '&[data-size="sm"]': {
-                        fontSize: '10px',
-                        height: '18px',
-                        minHeight: '18px',
-                    }
-                }
-            })
-        },
-
         // Loader
         Loader: {
             styles: (theme) => ({
@@ -509,6 +444,19 @@ export const darkTheme = createTheme({
         },
 
         TextInput: {
+            styles: (theme) => ({
+                input: {
+                    backgroundColor: theme.colors.dark[7],
+                    borderColor: theme.colors.dark[5],
+                    color: theme.colors.dark[0],
+                    '&:focus': {
+                        borderColor: theme.colors.blue[6]
+                    }
+                }
+            })
+        },
+
+        PasswordInput: {
             styles: (theme) => ({
                 input: {
                     backgroundColor: theme.colors.dark[7],
@@ -826,28 +774,6 @@ export const lightTheme = createTheme({
             })
         },
 
-        Badge: {
-            styles: (theme) => ({
-                root: {
-                    color: theme.colors.gray[9],
-                    backgroundColor: theme.colors.gray[2]
-                }
-            })
-        },
-
-        Button: {
-            styles: (theme) => ({
-                root: {
-                    '&[data-variant="light"]': {
-                        backgroundColor: theme.colors.gray[1],
-                        color: theme.colors.gray[9],
-                        '&:hover': {
-                            backgroundColor: theme.colors.gray[2]
-                        }
-                    }
-                }
-            })
-        }
     }
 });
 

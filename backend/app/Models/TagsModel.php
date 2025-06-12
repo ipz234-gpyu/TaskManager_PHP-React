@@ -4,7 +4,7 @@ namespace App\Models;
 
 use App\Core\Model;
 
-class TagModel extends Model
+class TagsModel extends Model
 {
     protected string $table = 'tags';
     protected string $alias = 'tag';

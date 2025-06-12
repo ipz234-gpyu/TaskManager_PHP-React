@@ -8,7 +8,7 @@ import {
     Badge,
     Button,
     Checkbox,
-    ScrollArea,
+    ScrollArea, Title,
 } from '@mantine/core';
 import {
     IconEdit,
@@ -16,10 +16,15 @@ import {
     IconCalendar,
     IconClock,
     IconAlarm,
-    IconFlag,
 } from '@tabler/icons-react';
 import SubtaskSection from './SubtaskSection';
-import { formatDate, getPriorityColor, getPriorityLabel, getStatusColor, getStatusLabel, isOverdue } from '../utils/taskUtils';
+import {
+    formatDate,
+    getPriorityColor,
+    getPriorityLabel,
+    getStatusColor,
+    getStatusLabel,
+} from '../utils/taskUtils';
 
 export default function TaskViewModal({
                                           opened,
@@ -28,99 +33,96 @@ export default function TaskViewModal({
                                           onEdit,
                                           onDelete,
                                           onStatusToggle,
-                                          onError
+                                          onError,
+                                          OptionalChild
                                       }) {
     return (
         <Modal
             opened={opened}
             onClose={onClose}
             title={
-                <Group>
+                <Group align="center">
                     <Checkbox
                         checked={task.status === 'completed'}
                         onChange={onStatusToggle}
-                        size="md"
+                        size="lg"
                         color="green"
                     />
-                    <Text fw={700} size="xl">{task.title}</Text>
+                    <Title order={2}>{task.title}</Title>
+                    <Badge size="lg" color={`${getStatusColor(task.status)}`}>
+                        {getStatusLabel(task.status)}
+                    </Badge>
+                    <Badge size="lg" color={getPriorityColor(task.priority)}>
+                        {getPriorityLabel(task.priority)}
+                    </Badge>
                 </Group>
             }
             size="lg"
             centered
         >
-            <ScrollArea style={{ maxHeight: '70vh' }}>
-                <Stack gap="md">
-                    {task.description && (
-                        <Group>
-                            <Text size="xl">Description:</Text>
-                            <Text size="xl" c="dimmed">{task.description}</Text>
-                        </Group>
-                    )}
+            <ScrollArea style={{maxHeight: '80vh'}}>
+                <Group grow>
+                    <Stack gap={10}>
+                        {task.description && (
+                            <Box style={{ wordBreak: 'break-word' }}>
+                                <Title order={3}>Description:</Title>
+                                <Text size="sm">{task.description}</Text>
+                            </Box>
+                        )}
 
-                    <Group grow>
-                        <Group>
-                            <Text size="xl">Status:</Text>
-                            <Badge size="lg" color={`${getStatusColor(task.status)}`}>
-                                {getStatusLabel(task.status)}
-                            </Badge>
-                        </Group>
-                        <Group >
-                            <Text size="xl">Priority:</Text>
-                            <Badge size="lg" color={getPriorityColor(task.priority)}>
-                                {getPriorityLabel(task.priority)}
-                            </Badge>
-                        </Group>
-                    </Group>
+                        {(task.start_time || task.deadline || task.notification) && (
+                            <Box>
+                                <Title order={3}>Timeline:</Title>
+                                <Stack gap="xs">
+                                    {task.start_time && (
+                                        <Group align="center" gap="xs">
+                                            <IconClock size={20}/>
+                                            <Text size="lg">Start: {formatDate(task.start_time)}</Text>
+                                        </Group>
+                                    )}
+                                    {task.deadline && (
+                                        <Group align="center" gap="xs">
+                                            <IconCalendar size={20}/>
+                                            <Text size="lg">Due: {formatDate(task.deadline)}</Text>
+                                        </Group>
+                                    )}
+                                    {task.notification && (
+                                        <Group align="center" gap="xs">
+                                            <IconAlarm size={20}/>
+                                            <Text size="lg">Reminder: {formatDate(task.notification)}</Text>
+                                        </Group>
+                                    )}
+                                </Stack>
+                            </Box>
+                        )}
+                    </Stack>
+                    {OptionalChild &&
+                        <Stack>
+                            {OptionalChild}
+                        </Stack>
+                    }
+                </Group>
 
-                    {(task.start_time || task.deadline || task.notification) && (
-                        <Box>
-                            <Text size="sm" fw={500} mb="xs">Timeline</Text>
-                            <Stack gap="xs">
-                                {task.start_time && (
-                                    <Group gap="xs">
-                                        <IconClock size={14} />
-                                        <Text size="sm">Start: {formatDate(task.start_time)}</Text>
-                                    </Group>
-                                )}
-                                {task.deadline && (
-                                    <Group gap="xs">
-                                        <IconCalendar size={14} color={isOverdue(task.deadline, task.status) ? 'red' : undefined} />
-                                        <Text size="sm" c={isOverdue(task.deadline, task.status) ? 'red' : undefined}>
-                                            Due: {formatDate(task.deadline)}
-                                        </Text>
-                                    </Group>
-                                )}
-                                {task.notification && (
-                                    <Group gap="xs">
-                                        <IconAlarm size={14} />
-                                        <Text size="sm">Reminder: {formatDate(task.notification)}</Text>
-                                    </Group>
-                                )}
-                            </Stack>
-                        </Box>
-                    )}
+                <SubtaskSection task={task} onError={onError}/>
 
-                    <SubtaskSection task={task} onError={onError} />
-
-                    <Group justify="space-between" pt="md">
-                        <Button
-                            variant="light"
-                            leftSection={<IconEdit size={16} />}
-                            onClick={onEdit}
-                        >
-                            Edit Task
-                        </Button>
-                        <Button
-                            variant="light"
-                            color="red"
-                            leftSection={<IconTrash size={16} />}
-                            onClick={onDelete}
-                        >
-                            Delete Task
-                        </Button>
-                    </Group>
-                </Stack>
             </ScrollArea>
+            <Group justify="flex-end" pt="md">
+                <Button
+                    variant="light"
+                    leftSection={<IconEdit size={20}/>}
+                    onClick={onEdit}
+                >
+                    Edit Task
+                </Button>
+                <Button
+                    variant="light"
+                    color="red"
+                    leftSection={<IconTrash size={20}/>}
+                    onClick={onDelete}
+                >
+                    Delete Task
+                </Button>
+            </Group>
         </Modal>
     );
 }
