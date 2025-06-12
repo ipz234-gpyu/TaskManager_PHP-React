@@ -21,6 +21,16 @@ class UserModel extends Model
         ];
     }
 
+    public static function formatBasicUserForTeam(array $user): array
+    {
+        return [
+            'id' => $user['id'],
+            'name' => $user['name'],
+            'surname' => $user['surname'],
+            'avatar' => UrlHelper::formatUserAvatar($user['avatar']),
+        ];
+    }
+
     public function create(array $data): bool
     {
         return $this->query()->insert($data);

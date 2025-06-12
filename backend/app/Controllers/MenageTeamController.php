@@ -4,6 +4,7 @@ namespace App\Controllers;
 
 use App\Core\Controller;
 use App\Core\Request;
+use App\Models\GroupFromTeamModel;
 use App\Models\TeamInvitationModel;
 use App\Models\TeamModel;
 use App\Models\UserModel;
@@ -250,6 +251,7 @@ class MenageTeamController extends Controller
     public function actionAcceptInvitation()
     {
         $data = Request::json();
+        $userId = Request::user()['id'];
         $token = $data['token'] ?? '';
 
         if (empty($token)) {
@@ -291,6 +293,10 @@ class MenageTeamController extends Controller
 
         $teamModel = new TeamModel();
         $team = $teamModel->findById($invitation['team_id']);
+        $team['isAdmin'] = $team['created_by'] === $userId;
+        unset($team['created_by'], $team['user_team_id']);
+
+        $team['dashboards'] = (new GroupFromTeamModel())->findByTeamId($team['id']);
 
         return $this->json([
             'team' => $team

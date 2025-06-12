@@ -6,15 +6,18 @@ use App\Core\Controller;
 use App\Core\Request;
 use App\Models\GroupFromTeamModel;
 use App\Models\ListModel;
+use App\Models\TaskAssignmentModel;
 use App\Models\TaskListModel;
 use App\Models\TaskModel;
 use App\Models\GroupListFromTeamModel;
+use App\Models\UserModel;
 use App\Models\UserTeamModel;
 use Ramsey\Uuid\Uuid;
 
 class TeamDashboardController extends Controller
 {
     public array $middlewares = [
+        'actionGetUsers' => ['auth'],
         'actionGetDashboard' => ['auth'],
         'actionAddList' => ['auth'],
         'actionUpdateList' => ['auth'],
@@ -26,6 +29,33 @@ class TeamDashboardController extends Controller
         'actionReorderTasks' => ['auth'],
         'actionReorderLists' => ['auth'],
     ];
+
+    public function actionGetUsers()
+    {
+        $data = Request::json();
+        $userId = Request::user()['id'];
+        $teamId = $data['teamId'] ?? '';
+
+        if (empty($teamId)) {
+            return $this->json(['message' => 'Team ID are required'], 400);
+        }
+
+        $userTeamModel = new UserTeamModel();
+        if (!$userTeamModel->isUserInTeam($userId, $teamId)) {
+            return $this->json(['message' => 'Forbidden'], 403);
+        }
+
+        $users = (new UserModel())->findAllByTeamId($teamId);
+        $usersResponses = [];
+
+        if ($users)
+            foreach ($users as $user)
+                $usersResponses[] = UserModel::formatBasicUserForTeam($user);
+
+        return $this->json([
+            'users' => $usersResponses,
+        ]);
+    }
 
     public function actionGetDashboard()
     {
@@ -262,8 +292,9 @@ class TeamDashboardController extends Controller
             return $this->json(['message' => 'Task not found'], 404);
         }
 
-        $taskModel->updateById($taskId, $data['task']);
+        $taskModel->updateById($taskId,  array_diff_key($data['task'], array_flip(['tags', 'assignedUserIds'])));
         $updatedTask = $taskModel->findById($taskId);
+        $updatedTask['assignedUserIds'] = (new TaskAssignmentModel())->findAssignedUserIds($taskId);
 
         return $this->json([
             'listId' => $listId,

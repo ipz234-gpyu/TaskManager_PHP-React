@@ -37,6 +37,18 @@ class TaskAssignmentModel extends Model
             ->where('ta.task_id', '=', $taskId)
             ->get();
     }
+    public function findAssignedUserIds(string $taskId): array
+    {
+        return array_column(
+            $this->query()
+                ->select(['u.id'])
+                ->join('user_teams ut', 'ut.id = ta.user_team_id')
+                ->join('users u', 'u.id = ut.user_id')
+                ->where('ta.task_id', '=', $taskId)
+                ->get(),
+            'id'
+        );
+    }
     public function findAssignedTasks(string $userTeamId): array
     {
         return $this->query()

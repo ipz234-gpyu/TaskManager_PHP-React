@@ -54,11 +54,11 @@ class ListModel extends Model
             ->first();
 
         if ($list) {
-            $taskModel = new TaskModel();
-            $list['tasks'] = $taskModel->findByListId($listId);
+            $list['tasks'] = (new TaskModel())->findByListId($listId);
 
             foreach ($list['tasks'] as &$task){
                 $task['tags'] = (new TaskTagModel())->findTagsByTaskId($task['id']);
+                $task['assignedUserIds'] = (new TaskAssignmentModel())->findAssignedUserIds($task['id']);
             }
         }
 
@@ -81,6 +81,10 @@ class ListModel extends Model
 
         foreach ($lists as &$list){
             $list['tasks'] = (new TaskModel())->findByListId($list['id']);
+
+            foreach ($list['tasks'] as &$task){
+                $task['assignedUserIds'] = (new TaskAssignmentModel())->findAssignedUserIds($task['id']);
+            }
         }
 
         return $lists;

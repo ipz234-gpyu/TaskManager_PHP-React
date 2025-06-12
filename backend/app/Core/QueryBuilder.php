@@ -30,6 +30,13 @@ class QueryBuilder
         return $this;
     }
 
+    public function pluck(string $column): array
+    {
+        $this->select([$column]);
+        $results = $this->get();
+        return array_column($results, $column);
+    }
+
     public function join(string $table, string $on): self
     {
         $this->joins[] = "JOIN $table ON $on";

@@ -60,7 +60,6 @@ class CustomDashboardController extends Controller
             'lists' => $lists
         ]);
     }
-
     public function actionAddList()
     {
         $data = Request::json();
@@ -105,7 +104,6 @@ class CustomDashboardController extends Controller
             ]
         ]);
     }
-
     public function actionUpdateList()
     {
         $data = Request::json();
@@ -135,7 +133,6 @@ class CustomDashboardController extends Controller
             'list' => $updatedList
         ]);
     }
-
     public function actionDeleteList()
     {
         $data = Request::json();
@@ -155,7 +152,6 @@ class CustomDashboardController extends Controller
 
         return $this->json(['deleteId' => $listId]);
     }
-
     public function actionAddTask()
     {
         $data = Request::json();
@@ -226,7 +222,7 @@ class CustomDashboardController extends Controller
             return $this->json(['message' => 'Task not found'], 404);
         }
 
-        $taskModel->updateById($taskId, array_diff_key($data['task'], ['tags' => '']));
+        $taskModel->updateById($taskId, array_diff_key($data['task'], array_flip(['tags', 'assignedUserIds'])));
         $updatedTask = $taskModel->findById($taskId);
         $updatedTask['tags'] = (new TaskTagModel())->findTagsByTaskId($taskId);
 
@@ -235,7 +231,6 @@ class CustomDashboardController extends Controller
             'task' => $updatedTask
         ]);
     }
-
     public function actionDeleteTask()
     {
         $data = Request::json();
@@ -260,7 +255,6 @@ class CustomDashboardController extends Controller
             'taskId' => $taskId
         ]);
     }
-
     public function actionMoveTask()
     {
         $data = Request::json();
@@ -290,7 +284,6 @@ class CustomDashboardController extends Controller
             'destListId' => $destListId
         ]);
     }
-
     public function actionReorderTasks()
     {
         $data = Request::json();
@@ -312,7 +305,6 @@ class CustomDashboardController extends Controller
 
         return $this->json(['success' => true]);
     }
-
     public function actionReorderLists()
     {
         $data = Request::json();

@@ -7,6 +7,8 @@ use App\Core\Request;
 use App\Models\TagsModel;
 use App\Models\TaskTagModel;
 use App\Models\TaskAssignmentModel;
+use App\Models\UserTeamModel;
+use Ramsey\Uuid\Uuid;
 
 class TaskController extends Controller
 {
@@ -21,7 +23,6 @@ class TaskController extends Controller
         'actionGetTasksByTag' => ['auth'],
         'actionCreateTaskAssignment' => ['auth'],
         'actionGetTaskAssignments' => ['auth'],
-        'actionUpdateTaskAssignment' => ['auth'],
         'actionDeleteTaskAssignment' => ['auth'],
         'actionGetAssignmentsByTask' => ['auth'],
         'actionGetAssignmentsByUser' => ['auth'],
@@ -36,6 +37,7 @@ class TaskController extends Controller
             'tags' => $tags
         ]);
     }
+
     public function actionCreateTag()
     {
         $data = Request::json();
@@ -70,6 +72,7 @@ class TaskController extends Controller
 
         return $this->json(['message' => 'Failed to create tag'], 500);
     }
+
     public function actionUpdateTag()
     {
         $data = Request::json();
@@ -109,6 +112,7 @@ class TaskController extends Controller
 
         return $this->json(['message' => 'Failed to update tag'], 500);
     }
+
     public function actionDeleteTag()
     {
         $data = Request::json();
@@ -170,6 +174,7 @@ class TaskController extends Controller
 
         return $this->json(['message' => 'Failed to add tag to task'], 500);
     }
+
     public function actionRemoveTagFromTask()
     {
         $data = Request::json();
@@ -202,6 +207,7 @@ class TaskController extends Controller
 
         return $this->json(['message' => 'Failed to remove tag from task'], 500);
     }
+
     public function actionGetTaskTags()
     {
         $data = Request::json();
@@ -218,6 +224,7 @@ class TaskController extends Controller
             'tags' => $tags
         ]);
     }
+
     public function actionGetTasksByTag()
     {
         $data = Request::json();
@@ -245,185 +252,134 @@ class TaskController extends Controller
             'tasks' => $tasks
         ]);
     }
-    /*
-        public function actionCreateTaskAssignment()
-        {
-            $data = Request::json();
-            $userId = Request::user()['id'];
 
-            $taskId = $data['taskId'] ?? '';
-            $userTeamId = $data['userTeamId'] ?? '';
-            $teamId = $data['teamId'] ?? '';
-            $assignedUserId = $data['assignedUserId'] ?? '';
+    public function actionGetTaskAssignments()
+    {
+        $data = Request::json();
+        $taskId = $data['taskId'] ?? '';
 
-            if (empty($taskId) || empty($userTeamId)) {
-                return $this->json(['message' => 'Task ID and User Team ID are required'], 400);
-            }
-
-            $userTeam = (new UserTeamModel())->findById($userTeamId);
-            if (!$userTeam) {
-                return $this->json(['message' => 'User team relationship not found'], 404);
-            }
-
-            if (!empty($teamId)) {
-                $isUserInTeam = (new UserTeamModel())->isUserInTeam($userId, $teamId);
-                if (!$isUserInTeam) {
-                    return $this->json(['message' => 'You are not a member of this team'], 403);
-                }
-            }
-
-            $assignmentData = [
-                'id' => uniqid(),
-                'task_id' => $taskId,
-                'user_team_id' => $userTeamId,
-                'created_at' => date('Y-m-d H:i:s'),
-                'updated_at' => date('Y-m-d H:i:s')
-            ];
-
-            $created = (new TaskAssignmentModel())->create($assignmentData);
-
-            if ($created) {
-                return $this->json([
-                    'success' => true,
-                    'data' => [
-                        'assignment' => $assignmentData
-                    ]
-                ]);
-            }
-
-            return $this->json(['message' => 'Failed to create task assignment'], 500);
+        if (empty($taskId)) {
+            return $this->json(['message' => 'Task ID is required'], 400);
         }
 
-        public function actionGetTaskAssignments()
-        {
-            $data = Request::json();
-            $userId = Request::user()['id'];
+        $assignments = (new TaskAssignmentModel())->findByTaskId($taskId);
 
-            $taskId = $data['taskId'] ?? '';
+        return $this->json([
+            'taskId' => $taskId,
+            'assignments' => $assignments
+        ]);
+    }
 
-            if (empty($taskId)) {
-                return $this->json(['message' => 'Task ID is required'], 400);
-            }
+    public function actionCreateTaskAssignment()
+    {
+        $data = Request::json();
+        $userId = Request::user()['id'];
 
-            $assignments = (new TaskAssignmentModel())->findByTaskId($taskId);
+        $taskId = $data['taskId'] ?? '';
+        $teamId = $data['teamId'] ?? '';
+        $assignedUserId = $data['assignedUserId'] ?? '';
 
+        if (empty($taskId) || empty($teamId) || empty($assignedUserId)) {
+            return $this->json(['message' => 'All fields are required'], 400);
+        }
+
+        if (!(new UserTeamModel())->isUserInTeam($userId, $teamId)) {
+            return $this->json(['message' => 'You are not a member of this team'], 403);
+        }
+
+        $userTeam = (new UserTeamModel())->findByUserAndTeam($assignedUserId, $teamId);
+        if (!$userTeam) {
+            return $this->json(['message' => 'User team relationship not found'], 404);
+        }
+
+        $assignmentData = [
+            'task_id' => $taskId,
+            'user_team_id' => $userTeam['id']
+        ];
+
+        $created = (new TaskAssignmentModel())->create($assignmentData);
+
+        if ($created) {
             return $this->json([
-                'success' => true,
-                'data' => [
-                    'taskId' => $taskId,
-                    'assignments' => $assignments
-                ]
+                'taskId' => $taskId,
+                'assignedUserId' => $assignedUserId
             ]);
         }
 
-        public function actionUpdateTaskAssignment()
-        {
-            $data = Request::json();
-            $userId = Request::user()['id'];
+        return $this->json(['message' => 'Failed to create task assignment'], 500);
+    }
 
-            $assignmentId = $data['assignmentId'] ?? '';
-            $userTeamId = $data['userTeamId'] ?? '';
 
-            if (empty($assignmentId)) {
-                return $this->json(['message' => 'Assignment ID is required'], 400);
-            }
+    public function actionDeleteTaskAssignment()
+    {
+        $data = Request::json();
+        $userId = Request::user()['id'];
 
-            $assignment = (new TaskAssignmentModel())->findById($assignmentId);
-            if (!$assignment) {
-                return $this->json(['message' => 'Assignment not found'], 404);
-            }
+        $taskId = $data['taskId'] ?? '';
+        $teamId = $data['teamId'] ?? '';
+        $assignedUserId = $data['assignedUserId'] ?? '';
 
-            $updateData = ['updated_at' => date('Y-m-d H:i:s')];
-            if (!empty($userTeamId)) {
-                $userTeam = (new UserTeamModel())->findById($userTeamId);
-                if (!$userTeam) {
-                    return $this->json(['message' => 'User team relationship not found'], 404);
-                }
-                $updateData['user_team_id'] = $userTeamId;
-            }
-
-            $updated = (new TaskAssignmentModel())->updateById($assignmentId, $updateData);
-
-            if ($updated) {
-                $updatedAssignment = (new TaskAssignmentModel())->findById($assignmentId);
-                return $this->json([
-                    'success' => true,
-                    'data' => [
-                        'assignment' => $updatedAssignment
-                    ]
-                ]);
-            }
-
-            return $this->json(['message' => 'Failed to update assignment'], 500);
+        if (empty($taskId) || empty($teamId) || empty($assignedUserId)) {
+            return $this->json(['message' => 'All fields are required'], 400);
         }
 
-        public function actionDeleteTaskAssignment()
-        {
-            $data = Request::json();
-            $userId = Request::user()['id'];
-
-            $assignmentId = $data['assignmentId'] ?? '';
-
-            if (empty($assignmentId)) {
-                return $this->json(['message' => 'Assignment ID is required'], 400);
-            }
-
-            $assignment = (new TaskAssignmentModel())->findById($assignmentId);
-            if (!$assignment) {
-                return $this->json(['message' => 'Assignment not found'], 404);
-            }
-
-            $deleted = (new TaskAssignmentModel())->deleteById($assignmentId);
-
-            if ($deleted) {
-                return $this->json([
-                    'success' => true,
-                    'data' => [
-                        'deletedId' => $assignmentId
-                    ]
-                ]);
-            }
-
-            return $this->json(['message' => 'Failed to delete assignment'], 500);
+        if (!(new UserTeamModel())->isUserInTeam($userId, $teamId)) {
+            return $this->json(['message' => 'You are not a member of this team'], 403);
         }
 
-        public function actionGetAssignmentsByTask()
-        {
-            $data = Request::json();
-            $taskId = $data['taskId'] ?? '';
+        $userTeam = (new UserTeamModel())->findByUserAndTeam($assignedUserId, $teamId);
+        if (!$userTeam) {
+            return $this->json(['message' => 'User team relationship not found'], 404);
+        }
 
-            if (empty($taskId)) {
-                return $this->json(['message' => 'Task ID is required'], 400);
-            }
+        $assignment = (new TaskAssignmentModel())->findByUserTeamAndTask($userTeam['id'], $taskId);
+        if (!$assignment) {
+            return $this->json(['message' => 'Assignment not found'], 404);
+        }
 
-            $assignments = (new TaskAssignmentModel())->findByTaskId($taskId);
+        $deleted = (new TaskAssignmentModel())->deleteByUserTeamAndTask($userTeam['id'], $taskId);
 
+        if ($deleted) {
             return $this->json([
-                'success' => true,
-                'data' => [
-                    'taskId' => $taskId,
-                    'assignments' => $assignments
-                ]
+                'taskId' => $taskId,
+                'assignedUserId' => $assignedUserId
             ]);
         }
 
-        public function actionGetAssignmentsByUser()
-        {
-            $data = Request::json();
-            $userTeamId = $data['userTeamId'] ?? '';
+        return $this->json(['message' => 'Failed to delete assignment'], 500);
+    }
 
-            if (empty($userTeamId)) {
-                return $this->json(['message' => 'User Team ID is required'], 400);
-            }
+    public function actionGetAssignmentsByTask()
+    {
+        $data = Request::json();
+        $taskId = $data['taskId'] ?? '';
 
-            $assignments = (new TaskAssignmentModel())->findByUserTeamId($userTeamId);
+        if (empty($taskId)) {
+            return $this->json(['message' => 'Task ID is required'], 400);
+        }
 
-            return $this->json([
-                'success' => true,
-                'data' => [
-                    'userTeamId' => $userTeamId,
-                    'assignments' => $assignments
-                ]
-            ]);
-        }*/
+        $assignments = (new TaskAssignmentModel())->findAssignedUserIds($taskId);
+
+        return $this->json([
+            'taskId' => $taskId,
+            'assignedUserIds' => $assignments
+        ]);
+    }
+
+    public function actionGetAssignmentsByUser()
+    {
+        $data = Request::json();
+        $userTeamId = $data['userTeamId'] ?? '';
+
+        if (empty($userTeamId)) {
+            return $this->json(['message' => 'User Team ID is required'], 400);
+        }
+
+        $assignments = (new TaskAssignmentModel())->findByUserTeamId($userTeamId);
+
+        return $this->json([
+            'userTeamId' => $userTeamId,
+            'assignments' => $assignments
+        ]);
+    }
 }

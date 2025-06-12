@@ -1,7 +1,7 @@
 # Default ignored files
 /vendor/
 /shelf/
-/public/uploads/
+/uploads/
 /workspace.xml
 # Editor-based HTTP Client requests
 /httpRequests/
