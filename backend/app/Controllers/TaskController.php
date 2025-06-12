@@ -5,6 +5,7 @@ namespace App\Controllers;
 use App\Core\Controller;
 use App\Core\Request;
 use App\Models\TagsModel;
+use App\Models\TaskModel;
 use App\Models\TaskTagModel;
 use App\Models\TaskAssignmentModel;
 use App\Models\UserTeamModel;
@@ -26,6 +27,8 @@ class TaskController extends Controller
         'actionDeleteTaskAssignment' => ['auth'],
         'actionGetAssignmentsByTask' => ['auth'],
         'actionGetAssignmentsByUser' => ['auth'],
+        'actionUpdateTask' => ['auth'],
+        'actionDeleteTask' => ['auth'],
     ];
 
     public function actionGetTags()
@@ -95,11 +98,13 @@ class TaskController extends Controller
             return $this->json(['message' => 'Forbidden'], 403);
         }
 
+        $updateData = [];
         if (!empty($name)) $updateData['name'] = $name;
         if (!empty($color)) $updateData['color'] = $color;
 
-        if (empty($updateData))
+        if (empty($updateData)) {
             return $this->json(['message' => 'Tag param is required'], 400);
+        }
 
         $updated = (new TagsModel())->updateById($tagId, $updateData);
 
@@ -154,6 +159,11 @@ class TaskController extends Controller
             return $this->json(['message' => 'Tag ID and Task ID are required'], 400);
         }
 
+        $taskModel = new TaskModel();
+        if (!$taskModel->hasUserAccess($taskId, $userId)) {
+            return $this->json(['message' => 'Access denied to this task'], 403);
+        }
+
         $tag = (new TagsModel())->findById($tagId);
         if (!$tag) {
             return $this->json(['message' => 'Tag not found'], 404);
@@ -187,6 +197,11 @@ class TaskController extends Controller
             return $this->json(['message' => 'Tag ID and Task ID are required'], 400);
         }
 
+        $taskModel = new TaskModel();
+        if (!$taskModel->hasUserAccess($taskId, $userId)) {
+            return $this->json(['message' => 'Access denied to this task'], 403);
+        }
+
         $tag = (new TagsModel())->findById($tagId);
         if (!$tag) {
             return $this->json(['message' => 'Tag not found'], 404);
@@ -211,10 +226,16 @@ class TaskController extends Controller
     public function actionGetTaskTags()
     {
         $data = Request::json();
+        $userId = Request::user()['id'];
         $taskId = $data['taskId'] ?? '';
 
         if (empty($taskId)) {
             return $this->json(['message' => 'Task ID is required'], 400);
+        }
+
+        $taskModel = new TaskModel();
+        if (!$taskModel->hasUserAccess($taskId, $userId)) {
+            return $this->json(['message' => 'Access denied to this task'], 403);
         }
 
         $tags = (new TaskTagModel())->findTagsByTaskId($taskId);
@@ -256,10 +277,16 @@ class TaskController extends Controller
     public function actionGetTaskAssignments()
     {
         $data = Request::json();
+        $userId = Request::user()['id'];
         $taskId = $data['taskId'] ?? '';
 
         if (empty($taskId)) {
             return $this->json(['message' => 'Task ID is required'], 400);
+        }
+
+        $taskModel = new TaskModel();
+        if (!$taskModel->hasUserAccess($taskId, $userId)) {
+            return $this->json(['message' => 'Access denied to this task'], 403);
         }
 
         $assignments = (new TaskAssignmentModel())->findByTaskId($taskId);
@@ -281,6 +308,11 @@ class TaskController extends Controller
 
         if (empty($taskId) || empty($teamId) || empty($assignedUserId)) {
             return $this->json(['message' => 'All fields are required'], 400);
+        }
+
+        $taskModel = new TaskModel();
+        if (!$taskModel->hasUserAccess($taskId, $userId)) {
+            return $this->json(['message' => 'Access denied to this task'], 403);
         }
 
         if (!(new UserTeamModel())->isUserInTeam($userId, $teamId)) {
@@ -309,7 +341,6 @@ class TaskController extends Controller
         return $this->json(['message' => 'Failed to create task assignment'], 500);
     }
 
-
     public function actionDeleteTaskAssignment()
     {
         $data = Request::json();
@@ -321,6 +352,11 @@ class TaskController extends Controller
 
         if (empty($taskId) || empty($teamId) || empty($assignedUserId)) {
             return $this->json(['message' => 'All fields are required'], 400);
+        }
+
+        $taskModel = new TaskModel();
+        if (!$taskModel->hasUserAccess($taskId, $userId)) {
+            return $this->json(['message' => 'Access denied to this task'], 403);
         }
 
         if (!(new UserTeamModel())->isUserInTeam($userId, $teamId)) {
@@ -352,10 +388,16 @@ class TaskController extends Controller
     public function actionGetAssignmentsByTask()
     {
         $data = Request::json();
+        $userId = Request::user()['id'];
         $taskId = $data['taskId'] ?? '';
 
         if (empty($taskId)) {
             return $this->json(['message' => 'Task ID is required'], 400);
+        }
+
+        $taskModel = new TaskModel();
+        if (!$taskModel->hasUserAccess($taskId, $userId)) {
+            return $this->json(['message' => 'Access denied to this task'], 403);
         }
 
         $assignments = (new TaskAssignmentModel())->findAssignedUserIds($taskId);
@@ -380,6 +422,82 @@ class TaskController extends Controller
         return $this->json([
             'userTeamId' => $userTeamId,
             'assignments' => $assignments
+        ]);
+    }
+
+    public function actionUpdateTask()
+    {
+        $data = Request::json();
+        $userId = Request::user()['id'];
+        $taskData = $data['task'] ?? [];
+
+        if (empty($taskData) || !isset($taskData['id'])) {
+            return $this->json(['message' => 'Task data and ID are required'], 400);
+        }
+
+        $taskId = $taskData['id'];  // Отримуємо ID з масиву
+        unset($taskData['id']);     // Видаляємо ID з даних для оновлення
+
+        $taskModel = new TaskModel();
+
+        // ВИПРАВЛЕННЯ: використовуємо $taskId (string), а не $taskData (array)
+        $task = $taskModel->findByIdWithAccess($taskId, $userId);
+        if (!$task) {
+            return $this->json(['message' => 'Task not found or access denied'], 404);
+        }
+
+        // Решта коду залишається без змін
+        $updateData = [];
+        $allowedFields = ['title', 'description', 'start_time', 'deadline', 'notification', 'priority', 'status'];
+
+        foreach ($allowedFields as $field) {
+            if (array_key_exists($field, $taskData)) {
+                $updateData[$field] = $taskData[$field];
+            }
+        }
+
+        if (empty($updateData)) {
+            return $this->json(['message' => 'No valid fields to update'], 400);
+        }
+
+        $success = $taskModel->updateByIdWithAccess($taskId, $updateData, $userId);
+
+        if (!$success) {
+            return $this->json(['message' => 'Failed to update task'], 500);
+        }
+
+        $updatedTask = $taskModel->findById($taskId);
+
+        return $this->json([
+            'task' => $updatedTask,
+        ]);
+    }
+
+    public function actionDeleteTask()
+    {
+        $data = Request::json();
+        $userId = Request::user()['id'];
+        $taskId = $data['taskId'] ?? '';
+
+        if (empty($taskId)) {
+            return $this->json(['message' => 'Task ID is required'], 400);
+        }
+
+        $taskModel = new TaskModel();
+
+        $task = $taskModel->findByIdWithAccess($taskId, $userId);
+        if (!$task) {
+            return $this->json(['message' => 'Task not found or access denied'], 404);
+        }
+
+        $success = $taskModel->deleteByIdWithAccess($taskId, $userId);
+
+        if (!$success) {
+            return $this->json(['message' => 'Failed to delete task'], 500);
+        }
+
+        return $this->json([
+            'deleteId' => $taskId,
         ]);
     }
 }

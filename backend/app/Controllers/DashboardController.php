@@ -6,6 +6,7 @@ use App\Core\Controller;
 use App\Core\Request;
 use App\Models\GroupFromTeamModel;
 use App\Models\GroupFromUserModel;
+use App\Models\TaskModel;
 use App\Models\TeamModel;
 use App\Models\UserTeamModel;
 use Ramsey\Uuid\Uuid;
@@ -25,6 +26,7 @@ class DashboardController extends Controller
         'actionAddTeamDashboard' => ['auth'],
         'actionDeleteTeamDashboard' => ['auth'],
         'actionUpdateTeamDashboard' => ['auth'],
+        'actionSearchTasks' => ['auth'],
     ];
 
     public function actionAddCustomDashboard()
@@ -382,5 +384,21 @@ class DashboardController extends Controller
                 'count' => $updated['count'] ?? 0
             ]
         ]);
+    }
+
+    public function actionSearchTasks()
+    {
+        $data = Request::json();
+        $userId = Request::user()['id'];
+        $searchQuery = $data['query'] ?? '';
+
+        if (empty($searchQuery)) {
+            return $this->json(['tasks' => []]);
+        }
+
+        $taskModel = new TaskModel();
+        $tasks = $taskModel->searchTasksByUser($userId, $searchQuery);
+
+        return $this->json(['tasks' => $tasks]);
     }
 }
