@@ -96,14 +96,16 @@ export default function TaskViewModal({
                             </Box>
                         )}
                     </Stack>
-                    {OptionalChild &&
-                        <Stack>
+                    {OptionalChild !== undefined &&
+                        <Box>
                             {OptionalChild}
-                        </Stack>
+                        </Box>
                     }
                 </Group>
 
+{/*
                 <SubtaskSection task={task} onError={onError}/>
+*/}
 
             </ScrollArea>
             <Group justify="flex-end" pt="md">

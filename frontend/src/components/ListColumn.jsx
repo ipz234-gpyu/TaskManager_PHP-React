@@ -76,16 +76,20 @@ export default function ListColumn({
                     <Text fw={700} size="lg">{list.name}</Text>
                 </Group>
                 <Group gap={1} align="center">
-                    <ActionIcon size="lg" variant="subtle" radius="lg"
-                                onClick={() => handleEditClick(list)}
-                    >
-                        <IconEdit size={20}/>
-                    </ActionIcon>
-                    <ActionIcon size="lg" variant="subtle" color="red" radius="lg"
-                                onClick={() => handleDeleteClick(list.id)}
-                    >
-                        <IconTrash size={20}/>
-                    </ActionIcon>
+                    {handleEditClick !== undefined &&
+                        <ActionIcon size="lg" variant="subtle" radius="lg"
+                                    onClick={() => handleEditClick(list)}
+                        >
+                            <IconEdit size={20}/>
+                        </ActionIcon>
+                    }
+                    {handleDeleteClick !== undefined &&
+                        <ActionIcon size="lg" variant="subtle" color="red" radius="lg"
+                                    onClick={() => handleDeleteClick(list.id)}
+                        >
+                            <IconTrash size={20}/>
+                        </ActionIcon>
+                    }
                     <ActionIcon variant="subtle" size="lg" color="green" onClick={open} radius="lg">
                         <IconPlus size={20}/>
                     </ActionIcon>

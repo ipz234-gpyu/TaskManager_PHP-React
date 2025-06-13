@@ -19,8 +19,7 @@ import RequireAuth from "./routes/RequireAuth.jsx";
 import NotFound from "./pages/NotFound.jsx";
 import LoginPage from "./pages/LoginPage.jsx";
 import RegisterPage from "./pages/RegisterPage.jsx";
-import TodayDashboard from "./pages/dashboards/TodayDashboard.jsx";
-import UpcomingDashboard from "./pages/dashboards/UpcomingDashboard.jsx";
+import TodayDashboard from "./pages/TodayDashboard.jsx";
 import CustomDashboard from "./pages/CustomDashboard.jsx";
 import TeamDashboardPage from "./pages/TeamDashboardPage.jsx";
 import TeamMembersPage from "./pages/TeamMembersPage.jsx";
@@ -38,7 +37,6 @@ function App() {
                     <Route element={<RootLayout/>}>
                         <Route path="dashboard">
                             <Route path="today" element={<TodayDashboard/>}/>
-                            <Route path="upcoming" element={<UpcomingDashboard/>}/>
                             <Route path="tag-management" element={<TagsManagement/>}/>
 
                             <Route path="custom/:dashboardId" element={<CustomDashboard/>}/>

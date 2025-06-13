@@ -42,15 +42,17 @@ export default function DashboardHeader({
     return (
         <Container size="xl" py="md">
             <Group justify="space-between" position="apart" align="center">
-                <Group align="center" spacing="sm"  wrap="nowrap">
+                <Group align="center" spacing="sm" wrap="nowrap">
                     <IconTable size={28}/>
                     <Title order={1} style={{whiteSpace: 'nowrap'}}>
                         {dashboard?.name}
                     </Title>
 
-                    <Button leftSection={<IconPlus size={18}/>} onClick={open}>
-                        Add List
-                    </Button>
+                    {addListHandle !== undefined &&
+                        <Button leftSection={<IconPlus size={18}/>} onClick={open}>
+                            Add List
+                        </Button>
+                    }
                 </Group>
 
                 <Group spacing="xl" wrap="nowrap">

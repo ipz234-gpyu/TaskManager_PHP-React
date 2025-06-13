@@ -1,10 +1,12 @@
 import { createSlice } from '@reduxjs/toolkit';
 
 const initialState = {
-    dashboardsDetail: null,
+    searchResults: [],
+    searchQuery: '',
     customDashboards: [],
     teams: [],
     activeTab: null,
+    dashboardsDetail: null,
 };
 
 const dashboardsSlice = createSlice({
@@ -78,7 +80,100 @@ const dashboardsSlice = createSlice({
         },
         clearDashboardsDetail: (state) => {
             state.dashboardsDetail = null;
-        }
+        },
+        setSearchResults: (state, action) => {
+            state.searchResults = action.payload;
+        },
+        setSearchQuery: (state, action) => {
+            state.searchQuery = action.payload;
+        },
+        clearSearchResults: (state) => {
+            state.searchResults = [];
+            state.searchQuery = '';
+        },
+
+        // Нові редюсери для роботи з завданнями в результатах пошуку
+        updateTaskInSearchResults: (state, action) => {
+            const { taskId, updatedTask } = action.payload;
+            state.searchResults = state.searchResults.map(task =>
+                task.id === taskId ? { ...task, ...updatedTask } : task
+            );
+        },
+
+        removeTaskFromSearchResults: (state, action) => {
+            const taskId = action.payload;
+            state.searchResults = state.searchResults.filter(task => task.id !== taskId);
+        },
+
+        // Редюсери для оновлення завдань у дошках команд
+        updateTaskInTeamDashboards: (state, action) => {
+            const { taskId, updatedTask } = action.payload;
+
+            state.teams.forEach(team => {
+                if (team.dashboards) {
+                    team.dashboards.forEach(dashboard => {
+                        if (dashboard.lists) {
+                            dashboard.lists.forEach(list => {
+                                if (list.tasks) {
+                                    list.tasks = list.tasks.map(task =>
+                                        task.id === taskId ? { ...task, ...updatedTask } : task
+                                    );
+                                }
+                            });
+                        }
+                    });
+                }
+            });
+        },
+
+        removeTaskFromTeamDashboards: (state, action) => {
+            const taskId = action.payload;
+
+            state.teams.forEach(team => {
+                if (team.dashboards) {
+                    team.dashboards.forEach(dashboard => {
+                        if (dashboard.lists) {
+                            dashboard.lists.forEach(list => {
+                                if (list.tasks) {
+                                    list.tasks = list.tasks.filter(task => task.id !== taskId);
+                                }
+                            });
+                        }
+                    });
+                }
+            });
+        },
+
+        // Редюсери для оновлення завдань у користувацьких дошках
+        updateTaskInCustomDashboards: (state, action) => {
+            const { taskId, updatedTask } = action.payload;
+
+            state.customDashboards.forEach(dashboard => {
+                if (dashboard.lists) {
+                    dashboard.lists.forEach(list => {
+                        if (list.tasks) {
+                            list.tasks = list.tasks.map(task =>
+                                task.id === taskId ? { ...task, ...updatedTask } : task
+                            );
+                        }
+                    });
+                }
+            });
+        },
+
+        removeTaskFromCustomDashboards: (state, action) => {
+            const taskId = action.payload;
+
+            state.customDashboards.forEach(dashboard => {
+                if (dashboard.lists) {
+                    dashboard.lists.forEach(list => {
+                        if (list.tasks) {
+                            list.tasks = list.tasks.filter(task => task.id !== taskId);
+                        }
+                    });
+                }
+            });
+        },
     }
 })
 
@@ -97,6 +192,15 @@ export const {
     setActiveTab,
     setDashboardsDetail,
     clearDashboardsDetail,
+    setSearchResults,
+    setSearchQuery,
+    clearSearchResults,
+    updateTaskInSearchResults,
+    removeTaskFromSearchResults,
+    updateTaskInTeamDashboards,
+    removeTaskFromTeamDashboards,
+    updateTaskInCustomDashboards,
+    removeTaskFromCustomDashboards,
 } = dashboardsSlice.actions;
 
 export default dashboardsSlice.reducer;

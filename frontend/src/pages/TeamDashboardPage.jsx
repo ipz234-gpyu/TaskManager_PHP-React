@@ -8,7 +8,11 @@ import {
     Loader,
     Center,
     Modal,
-    TextInput
+    TextInput,
+    Box,
+    Avatar,
+    Tooltip,
+    Text
 } from '@mantine/core';
 import {
     IconAlertCircle,
@@ -23,46 +27,48 @@ import {
     useAddTaskToTeamListMutation,
     useUpdateTaskInTeamListMutation,
     useDeleteTaskFromTeamListMutation,
+    useGetUsersMutation,
 } from '../features/teamDashboard/teamDashboardApi';
 import ListColumn from '../components/ListColumn.jsx';
 import DashboardHeader from "../components/DashboardHeader.jsx";
 import { useDisclosure } from "@mantine/hooks";
 import { setActiveTab } from "../features/dashboards/dashboardsSlice.js";
+import AssignedSelectionListComponent from "../components/AssignedSelectionListComponent.jsx";
 
 export default function TeamDashboardPage() {
-    const { teamId, dashboardId } = useParams();
+    const {teamId, dashboardId} = useParams();
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const lists = useSelector(state => state.teamDashboard.lists);
     const dashboard = useSelector(state => state.teamDashboard.dashboard);
-    const [getDashboard, { isLoading, error: loadError }] = useGetTeamDashboardMutation();
+    const users = useSelector(state => state.teamDashboard.users);
+    const [getDashboard, {isLoading, error: loadError}] = useGetTeamDashboardMutation();
+    const [getUsers, {isLoading: isUsersLoading}] = useGetUsersMutation();
 
-    const [deleteOpened, { open: openDelete, close: closeDelete }] = useDisclosure(false);
-    const [editOpened, { open: openEdit, close: closeEdit }] = useDisclosure(false);
+    const [deleteOpened, {open: openDelete, close: closeDelete}] = useDisclosure(false);
+    const [editOpened, {open: openEdit, close: closeEdit}] = useDisclosure(false);
     const [listToDelete, setListToDelete] = useState(null);
     const [editedList, setEditedList] = useState(null);
     const [editedName, setEditedName] = useState('');
-    const [addList, { isLoading: isListAdding }] = useAddListToTeamDashboardMutation();
-    const [updateList, { isLoading: isListUpdating }] = useUpdateListInTeamDashboardMutation();
-    const [deleteList, { isLoading: isListDeleting }] = useDeleteListFromTeamDashboardMutation();
-    const [addTask, { isLoading: isTaskAdding }] = useAddTaskToTeamListMutation();
+    const [addList, {isLoading: isListAdding}] = useAddListToTeamDashboardMutation();
+    const [updateList, {isLoading: isListUpdating}] = useUpdateListInTeamDashboardMutation();
+    const [deleteList, {isLoading: isListDeleting}] = useDeleteListFromTeamDashboardMutation();
+    const [addTask, {isLoading: isTaskAdding}] = useAddTaskToTeamListMutation();
     const [updateTask] = useUpdateTaskInTeamListMutation();
     const [deleteTask] = useDeleteTaskFromTeamListMutation();
 
     const addListHandle = async (values) => {
         try {
-            await addList({ dashboardId: dashboard.id, teamId, ...values });
-        }
-        catch {
+            await addList({dashboardId: dashboard.id, teamId, ...values});
+        } catch {
             setError('Add list failed');
         }
     };
 
     const addTaskHandle = async (values) => {
         try {
-            await addTask({ ...values, teamId });
-        }
-        catch {
+            await addTask({...values, teamId});
+        } catch {
             setError('Add task failed');
         }
     };
@@ -103,9 +109,8 @@ export default function TeamDashboardPage() {
         if (!editedList || !editedName.trim()) return;
 
         try {
-            await updateList({ listId: editedList, name: editedName, teamId });
-        }
-        catch {
+            await updateList({listId: editedList, name: editedName, teamId});
+        } catch {
             setError('Update list failed');
         }
         closeEdit();
@@ -120,9 +125,8 @@ export default function TeamDashboardPage() {
         if (!listToDelete) return;
         closeDelete();
         try {
-            await deleteList({ listId: listToDelete, teamId });
-        }
-        catch {
+            await deleteList({listId: listToDelete, teamId});
+        } catch {
             setError('Delete list failed');
         }
     };
@@ -137,25 +141,65 @@ export default function TeamDashboardPage() {
 
         const fetchDashboard = async () => {
             try {
-                await getDashboard({ teamId, dashboardId }).unwrap();
+                await getDashboard({teamId, dashboardId}).unwrap();
+                await getUsers({teamId}).unwrap();
                 dispatch(setActiveTab(dashboardId));
-            }
-            catch {
+            } catch {
                 navigate('/not-found');
             }
         };
 
         fetchDashboard();
+        const intervalId = setInterval(fetchDashboard, 100000);
+        return () => clearInterval(intervalId);
     }, [dashboardId, teamId]);
+
+    const renderChild = (task) => {
+        const assignedUsers = users?.filter(user => task?.assignedUserIds?.includes(user.id));
+
+        return (
+            <Group>
+                {assignedUsers?.length > 0 &&
+                    <>
+                        <Text size="md">
+                            Assigned:
+                        </Text>
+                        <Tooltip.Group openDelay={300} closeDelay={100}>
+                            <Avatar.Group spacing="sm">
+                                {assignedUsers?.map(user => (
+                                    <Tooltip withArrow key={user.id} label={`${user.name} ${user.surname}`}>
+                                        <Avatar src={user.avatar} radius="xl"
+                                                style={{
+                                                    transition: 'transform 150ms ease',
+                                                    cursor: 'pointer',
+                                                }}
+                                                onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.1)'}
+                                                onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
+                                        />
+                                    </Tooltip>
+                                ))}
+                            </Avatar.Group>
+                        </Tooltip.Group>
+                    </>
+                }
+            </Group>
+        );
+    };
+
+    const renderOptionalChild = (task) => {
+        return (
+            <AssignedSelectionListComponent task={task} teamId={teamId}/>
+        );
+    };
 
     if (isLoading) return (
         <Center className="h-screen">
-            <Loader color="blue" size="xl" variant="dots" />
+            <Loader color="blue" size="xl" variant="dots"/>
         </Center>
     );
 
     if (loadError || error) return (
-        <Alert icon={<IconAlertCircle />} color="red">
+        <Alert icon={<IconAlertCircle/>} color="red">
             {error || loadError.message}
         </Alert>
     );
@@ -170,7 +214,7 @@ export default function TeamDashboardPage() {
                 isLoading={isListAdding}
             />
 
-            <ScrollArea style={{ height: '80vh' }}>
+            <ScrollArea style={{height: '80vh'}}>
                 <Group spacing="md" grow wrap="nowrap">
                     {lists.map(list => (
                         <ListColumn
@@ -183,6 +227,9 @@ export default function TeamDashboardPage() {
                             onTaskStatusToggle={(taskId, newStatus) => handleTaskStatusToggle(list.id, taskId, newStatus)}
                             onTaskDelete={(taskId) => handleTaskDelete(list.id, taskId)}
                             onTaskUpdate={(taskId, updatedTask) => handleTaskUpdate(list.id, taskId, updatedTask)}
+
+                            renderChild={renderChild}
+                            renderOptionalChild={renderOptionalChild}
                         />
                     ))}
                 </Group>

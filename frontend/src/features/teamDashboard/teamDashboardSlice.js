@@ -108,7 +108,33 @@ const teamDashboardSlice = createSlice({
         },
         clearError: (state) => {
             state.error = null;
-        }
+        },
+        setUsers: (state, action) => {
+            state.users = action.payload;
+        },
+        addAssignedToTask: (state, action) => {
+            const { taskId, assignedUserId } = action.payload;
+
+            state.lists.forEach(list => {
+                const task = list.tasks?.find(t => t.id === taskId);
+                if (task) {
+                    task.assignedUserIds = task.assignedUserIds || [];
+                    if (!task.assignedUserIds.includes(assignedUserId)) {
+                        task.assignedUserIds.push(assignedUserId);
+                    }
+                }
+            });
+        },
+        removeAssignedFromTask: (state, action) => {
+            const { taskId, assignedUserId  } = action.payload;
+
+            state.lists.forEach(list => {
+                const task = list.tasks?.find(t => t.id === taskId);
+                if (task && Array.isArray(task.assignedUserIds)) {
+                    task.assignedUserIds = task.assignedUserIds.filter(id => id !== assignedUserId);
+                }
+            });
+        },
     }
 });
 
@@ -126,7 +152,10 @@ export const {
     reorderLists,
     setLoading,
     setError,
-    clearError
+    clearError,
+    setUsers,
+    removeAssignedFromTask,
+    addAssignedToTask
 } = teamDashboardSlice.actions;
 
 export default teamDashboardSlice.reducer;

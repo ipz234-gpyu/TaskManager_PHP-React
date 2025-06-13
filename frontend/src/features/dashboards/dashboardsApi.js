@@ -11,9 +11,16 @@ import {
     addDashboardToTeam,
     removeDashboardFromTeam,
     updateTeamDashboard,
+    setSearchResults,
+    updateTaskInSearchResults,
+    removeTaskFromSearchResults,
+    updateTaskInTeamDashboards,
+    removeTaskFromTeamDashboards,
+    updateTaskInCustomDashboards,
+    removeTaskFromCustomDashboards,
 } from './dashboardsSlice.js';
-import { setCustomDashboard } from '../customDashboard/customDashboardSlice.js'
-import { setTeamDashboard } from '../teamDashboard/teamDashboardSlice.js'
+import { setCustomDashboard } from '../customDashboard/customDashboardSlice.js';
+import { setTeamDashboard } from '../teamDashboard/teamDashboardSlice.js';
 import { baseQueryWithReauth } from './../baseApi';
 
 export const dashboardsApi = createApi({
@@ -26,9 +33,9 @@ export const dashboardsApi = createApi({
                 method: 'POST',
                 body: JSON.stringify(credentials)
             }),
-            async onQueryStarted(_, {dispatch, queryFulfilled}) {
+            async onQueryStarted(_, { dispatch, queryFulfilled }) {
                 try {
-                    const {data} = await queryFulfilled;
+                    const { data } = await queryFulfilled;
                     dispatch(addCustomDashboard(data.data.dashboard));
                 } catch {
                 }
@@ -39,9 +46,9 @@ export const dashboardsApi = createApi({
                 url: '/dashboard/getCustomDashboards',
                 method: 'GET',
             }),
-            async onQueryStarted(_, {dispatch, queryFulfilled}) {
+            async onQueryStarted(_, { dispatch, queryFulfilled }) {
                 try {
-                    const {data} = await queryFulfilled;
+                    const { data } = await queryFulfilled;
                     dispatch(setCustomDashboards(data.data.dashboards));
                 } catch {
                 }
@@ -51,11 +58,11 @@ export const dashboardsApi = createApi({
             query: (credentials) => ({
                 url: '/dashboard/deleteCustomDashboard',
                 method: 'DELETE',
-                body: JSON.stringify({id: credentials})
+                body: JSON.stringify({ id: credentials })
             }),
-            async onQueryStarted(_, {dispatch, queryFulfilled}) {
+            async onQueryStarted(_, { dispatch, queryFulfilled }) {
                 try {
-                    const {data} = await queryFulfilled;
+                    const { data } = await queryFulfilled;
                     dispatch(removeCustomDashboard(data.data.deleteId));
                 } catch {
                 }
@@ -67,13 +74,13 @@ export const dashboardsApi = createApi({
                 method: 'PUT',
                 body: JSON.stringify(credentials)
             }),
-            async onQueryStarted(_, {dispatch, queryFulfilled, getState}) {
+            async onQueryStarted(_, { dispatch, queryFulfilled, getState }) {
                 try {
-                    const {data} = await queryFulfilled;
+                    const { data } = await queryFulfilled;
                     dispatch(updateCustomDashboard(data.data.dashboard));
 
                     if (data.data.dashboard.id === getState().dashboards.activeTab) {
-                        dispatch(setCustomDashboard(data.data.dashboard))
+                        dispatch(setCustomDashboard(data.data.dashboard));
                     }
                 } catch {
                 }
@@ -85,9 +92,9 @@ export const dashboardsApi = createApi({
                 method: 'POST',
                 body: JSON.stringify(credentials)
             }),
-            async onQueryStarted(_, {dispatch, queryFulfilled}) {
+            async onQueryStarted(_, { dispatch, queryFulfilled }) {
                 try {
-                    const {data} = await queryFulfilled;
+                    const { data } = await queryFulfilled;
                     dispatch(addTeam(data.data.team));
                 } catch {
                 }
@@ -98,9 +105,9 @@ export const dashboardsApi = createApi({
                 url: '/dashboard/getTeams',
                 method: 'GET',
             }),
-            async onQueryStarted(_, {dispatch, queryFulfilled}) {
+            async onQueryStarted(_, { dispatch, queryFulfilled }) {
                 try {
-                    const {data} = await queryFulfilled;
+                    const { data } = await queryFulfilled;
                     dispatch(setTeams(data.data.teams));
                 } catch {
                 }
@@ -110,11 +117,11 @@ export const dashboardsApi = createApi({
             query: (credentials) => ({
                 url: '/dashboard/deleteTeam',
                 method: 'DELETE',
-                body: JSON.stringify({id: credentials})
+                body: JSON.stringify({ id: credentials })
             }),
-            async onQueryStarted(_, {dispatch, queryFulfilled}) {
+            async onQueryStarted(_, { dispatch, queryFulfilled }) {
                 try {
-                    const {data} = await queryFulfilled;
+                    const { data } = await queryFulfilled;
                     dispatch(removeTeam(data.data.deleteId));
                 } catch {
                 }
@@ -126,9 +133,9 @@ export const dashboardsApi = createApi({
                 method: 'PUT',
                 body: JSON.stringify(credentials)
             }),
-            async onQueryStarted(_, {dispatch, queryFulfilled}) {
+            async onQueryStarted(_, { dispatch, queryFulfilled }) {
                 try {
-                    const {data} = await queryFulfilled;
+                    const { data } = await queryFulfilled;
                     dispatch(updateTeam(data.data.team));
                 } catch {
                 }
@@ -140,9 +147,9 @@ export const dashboardsApi = createApi({
                 method: 'POST',
                 body: JSON.stringify(credentials)
             }),
-            async onQueryStarted(_, {dispatch, queryFulfilled}) {
+            async onQueryStarted(_, { dispatch, queryFulfilled }) {
                 try {
-                    const {data} = await queryFulfilled;
+                    const { data } = await queryFulfilled;
                     dispatch(addDashboardToTeam({
                         teamId: data.data.teamId,
                         dashboard: data.data.dashboard
@@ -152,12 +159,12 @@ export const dashboardsApi = createApi({
             },
         }),
         deleteTeamDashboard: builder.mutation({
-            query: ({teamId, dashboardId}) => ({
+            query: ({ teamId, dashboardId }) => ({
                 url: '/dashboard/deleteTeamDashboard',
                 method: 'DELETE',
-                body: JSON.stringify({teamId, dashboardId})
+                body: JSON.stringify({ teamId, dashboardId })
             }),
-            async onQueryStarted({teamId, dashboardId}, {dispatch, queryFulfilled}) {
+            async onQueryStarted({ teamId, dashboardId }, { dispatch, queryFulfilled }) {
                 try {
                     await queryFulfilled;
                     dispatch(removeDashboardFromTeam({
@@ -169,20 +176,95 @@ export const dashboardsApi = createApi({
             },
         }),
         updateTeamDashboard: builder.mutation({
-            query: ({teamId, dashboardId, name}) => ({
+            query: ({ teamId, dashboardId, name }) => ({
                 url: '/dashboard/updateTeamDashboard',
                 method: 'PUT',
-                body: JSON.stringify({teamId, dashboardId, name})
+                body: JSON.stringify({ teamId, dashboardId, name })
             }),
-            async onQueryStarted(_, {dispatch, queryFulfilled, getState}) {
+            async onQueryStarted(_, { dispatch, queryFulfilled, getState }) {
                 try {
-                    const {data} = await queryFulfilled;
+                    const { data } = await queryFulfilled;
                     dispatch(updateTeamDashboard(data.data.dashboard));
 
                     if (data.data.dashboard.id === getState().dashboards.activeTab) {
-                        dispatch(setTeamDashboard(data.data.dashboard))
+                        dispatch(setTeamDashboard(data.data.dashboard));
                     }
                 } catch {
+                }
+            },
+        }),
+
+        searchTasks: builder.query({
+            query: (searchQuery) => ({
+                url: '/dashboard/searchTasks',
+                method: 'POST',
+                body: JSON.stringify({ query: searchQuery })
+            }),
+            async onQueryStarted(_, { dispatch, queryFulfilled }) {
+                try {
+                    const { data } = await queryFulfilled;
+                    dispatch(setSearchResults(data.data.tasks));
+                } catch {
+                    dispatch(setSearchResults([]));
+                }
+            },
+        }),
+
+        updateTask: builder.mutation({
+            query: (taskData) => ({
+                url: '/task/updateTask',
+                method: 'PUT',
+                body: JSON.stringify({
+                    task: taskData
+                })
+            }),
+            async onQueryStarted(taskData, { dispatch, queryFulfilled, getState }) {
+                try {
+                    const { data } = await queryFulfilled;
+                    const updatedTask = data.data.task;
+                    const taskId = taskData.id;
+
+                    const currentSearchResults = getState().dashboards.searchResults;
+                    if (currentSearchResults.some(task => task.id === taskId)) {
+                        dispatch(updateTaskInSearchResults({ taskId, updatedTask }));
+                    }
+
+                    dispatch(updateTaskInTeamDashboards({ taskId, updatedTask }));
+                    dispatch(updateTaskInCustomDashboards({ taskId, updatedTask }));
+
+                } catch (error) {
+                    console.error('Failed to update task:', error);
+                }
+            },
+        }),
+
+        deleteTask: builder.mutation({
+            query: (taskId) => ({
+                url: '/task/deleteTask',
+                method: 'DELETE',
+                body: JSON.stringify({
+                    taskId: taskId
+                })
+            }),
+            async onQueryStarted(taskId, { dispatch, queryFulfilled, getState }) {
+                try {
+                    const { data } = await queryFulfilled;
+                    const deletedTaskId = data.data.deleteId;
+
+                    // Видаляємо завдання з результатів пошуку
+                    const currentSearchResults = getState().dashboards.searchResults;
+                    if (currentSearchResults.some(task => task.id === deletedTaskId)) {
+                        dispatch(removeTaskFromSearchResults(deletedTaskId));
+                    }
+
+                    // Видаляємо завдання з командних дошок
+                    dispatch(removeTaskFromTeamDashboards(deletedTaskId));
+
+                    // Видаляємо завдання з користувацьких дошок
+                    dispatch(removeTaskFromCustomDashboards(deletedTaskId));
+
+                } catch (error) {
+                    console.error('Failed to delete task:', error);
                 }
             },
         }),
@@ -200,5 +282,8 @@ export const {
     useUpdateTeamMutation,
     useAddTeamDashboardMutation,
     useDeleteTeamDashboardMutation,
-    useUpdateTeamDashboardMutation
+    useUpdateTeamDashboardMutation,
+    useSearchTasksQuery,
+    useUpdateTaskMutation,
+    useDeleteTaskMutation,
 } = dashboardsApi;

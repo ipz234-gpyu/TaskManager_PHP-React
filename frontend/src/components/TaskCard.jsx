@@ -108,20 +108,37 @@ export default function TaskCard({
                         />
 
                         <Stack gap="xs" style={{flex: 1, minWidth: 0}}>
-                            <Text
-                                size="sm"
-                                fw={500}
-                                style={{
-                                    textDecoration: task.status === 'completed' ? 'line-through' : 'none',
-                                    wordBreak: 'break-word'
-                                }}
-                            >
-                                {task.title}
-                            </Text>
+                            <Group align="center" justify="space-between">
+                                <Text
+                                    size="md"
+                                    fw={700}
+                                    style={{
+                                        textDecoration: task.status === 'completed' ? 'line-through' : 'none',
+                                        wordBreak: 'break-word'
+                                    }}
+                                >
+                                    {task.title}
+                                </Text>
+
+                                <Group gap={1} align="center">
+                                    <ActionIcon size="md" variant="subtle" radius="lg"
+                                                onClick={handleEditClick}
+                                    >
+                                        <IconEdit size={20}/>
+                                    </ActionIcon>
+                                    {task.status === 'completed' &&
+                                        <ActionIcon size="md" variant="subtle" color="red" radius="lg"
+                                                    onClick={() => handleDelete()}
+                                        >
+                                            <IconTrash size={20}/>
+                                        </ActionIcon>
+                                    }
+                                </Group>
+                            </Group>
 
                             {task.description && (
                                 <Text
-                                    size="xs"
+                                    size="sm"
                                     c="dimmed"
                                     lineClamp={2}
                                     style={{wordBreak: 'break-word'}}
@@ -133,10 +150,9 @@ export default function TaskCard({
                             <Group gap="xs" wrap="wrap">
                                 {task.deadline && (
                                     <Badge
-                                        size="xs"
                                         color={isOverdue(task.deadline, task.status) ? 'red' : 'blue'}
                                         variant="light"
-                                        leftSection={<IconCalendar size={10}/>}
+                                        leftSection={<IconCalendar size={16}/>}
                                     >
                                         {formatDate(task.deadline)}
                                     </Badge>
@@ -144,10 +160,9 @@ export default function TaskCard({
 
                                 {task.start_time && (
                                     <Badge
-                                        size="xs"
                                         color="gray"
                                         variant="light"
-                                        leftSection={<IconClock size={10}/>}
+                                        leftSection={<IconClock size={16}/>}
                                     >
                                         {formatDate(task.start_time)}
                                     </Badge>
@@ -155,10 +170,9 @@ export default function TaskCard({
 
                                 {task.notification && (
                                     <Badge
-                                        size="xs"
                                         color="orange"
                                         variant="light"
-                                        leftSection={<IconAlarm size={10}/>}
+                                        leftSection={<IconAlarm size={16}/>}
                                     >
                                         Reminder
                                     </Badge>
@@ -176,27 +190,12 @@ export default function TaskCard({
                                 )}
                             </Group>
 
-                            {children &&
+                            {children !== undefined &&
                                 <Box>
                                     {children}
                                 </Box>
                             }
                         </Stack>
-                    </Group>
-
-                    <Group gap={1} align="center">
-                        <ActionIcon size="lg" variant="subtle" radius="lg"
-                                    onClick={handleEditClick}
-                        >
-                            <IconEdit size={20}/>
-                        </ActionIcon>
-                        {task.status === 'completed' &&
-                            <ActionIcon size="lg" variant="subtle" color="red" radius="lg"
-                                        onClick={() => handleDelete()}
-                            >
-                                <IconTrash size={20}/>
-                            </ActionIcon>
-                        }
                     </Group>
                 </Group>
             </Paper>

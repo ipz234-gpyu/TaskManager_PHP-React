@@ -78,11 +78,6 @@ export default function SettingsPage() {
     const handleEmailChange = async (values) => {
         try {
             await changeEmail(values).unwrap();
-            notifications.show({
-                title: 'Success',
-                message: 'Email changed successfully',
-                color: 'green',
-            });
             emailForm.setFieldValue('password', '');
         } catch (error) {
             notifications.show({
@@ -96,11 +91,6 @@ export default function SettingsPage() {
     const handlePasswordChange = async (values) => {
         try {
             await changePassword(values).unwrap();
-            notifications.show({
-                title: 'Success',
-                message: 'Password changed successfully',
-                color: 'green',
-            });
             passwordForm.reset();
         } catch (error) {
             notifications.show({
@@ -114,11 +104,6 @@ export default function SettingsPage() {
     const handleDeleteAccount = async (values) => {
         try {
             await deleteAccount(values).unwrap();
-            notifications.show({
-                title: 'Account Deleted',
-                message: 'Your account has been deleted successfully',
-                color: 'green',
-            });
             setDeleteModalOpened(false);
             navigate('/');
         } catch (error) {
@@ -155,11 +140,6 @@ export default function SettingsPage() {
 
         try {
             await uploadAvatar(formData).unwrap();
-            notifications.show({
-                title: 'Success',
-                message: 'Avatar uploaded successfully',
-                color: 'green',
-            });
         } catch (error) {
             notifications.show({
                 title: 'Error',
@@ -172,11 +152,6 @@ export default function SettingsPage() {
     const handleLogout = async () => {
         try {
             await logout().unwrap();
-            notifications.show({
-                title: 'Logged out',
-                message: 'You have been logged out successfully',
-                color: 'blue',
-            });
             navigate('/login');
         } catch (error) {
             notifications.show({

@@ -10,7 +10,10 @@ import {
     deleteTask,
     moveTask,
     reorderTasks,
-    reorderLists
+    reorderLists,
+    setUsers,
+    removeAssignedFromTask,
+    addAssignedToTask
 } from './teamDashboardSlice.js';
 import { baseQueryWithReauth } from './../baseApi';
 import { updateTeamDashboard } from "../dashboards/dashboardsSlice.js";
@@ -230,6 +233,52 @@ export const teamDashboardApi = createApi({
                 }
             },
         }),
+
+        getUsers: builder.mutation({
+            query: (credentials) => ({
+                url: '/teamDashboard/getUsers',
+                method: 'POST',
+                body: JSON.stringify(credentials)
+            }),
+            async onQueryStarted(_, {dispatch, queryFulfilled}) {
+                try {
+                    const {data} = await queryFulfilled;
+                    dispatch(setUsers(data.data.users));
+                } catch (error) {
+                    console.error('Error loading users:', error);
+                }
+            },
+        }),
+        removeAssignedFromTask: builder.mutation({
+            query: (credentials) => ({
+                url: '/task/deleteTaskAssignment',
+                method: 'DELETE',
+                body: JSON.stringify(credentials)
+            }),
+            async onQueryStarted(_, {dispatch, queryFulfilled}) {
+                try {
+                    const {data} = await queryFulfilled;
+                    dispatch(removeAssignedFromTask(data.data));
+                } catch (error) {
+                    console.error('Error deleting task:', error);
+                }
+            },
+        }),
+        addAssignedToTask: builder.mutation({
+            query: (credentials) => ({
+                url: '/task/createTaskAssignment',
+                method: 'POST',
+                body: JSON.stringify(credentials)
+            }),
+            async onQueryStarted(_, {dispatch, queryFulfilled}) {
+                try {
+                    const {data} = await queryFulfilled;
+                    dispatch(addAssignedToTask(data.data));
+                } catch (error) {
+                    console.error('Error deleting task:', error);
+                }
+            },
+        }),
     })
 });
 
@@ -243,5 +292,8 @@ export const {
     useDeleteTaskFromTeamListMutation,
     useMoveTaskBetweenTeamListsMutation,
     useReorderTasksInTeamListMutation,
-    useReorderListsInTeamDashboardMutation
+    useReorderListsInTeamDashboardMutation,
+    useGetUsersMutation,
+    useRemoveAssignedFromTaskMutation,
+    useAddAssignedToTaskMutation,
 } = teamDashboardApi;

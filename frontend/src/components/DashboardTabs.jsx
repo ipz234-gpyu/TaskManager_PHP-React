@@ -2,12 +2,10 @@ import React, { useState } from 'react';
 import {
     ScrollArea,
     Divider,
-    Group,
     Stack,
 } from '@mantine/core';
 import {
     IconCalendar,
-    IconCalendarUp,
     IconTag,
 } from '@tabler/icons-react';
 
@@ -19,15 +17,8 @@ function DashboardTabs() {
     const defaultDashboards = [
         {
             id: 'today',
-            name: 'Today',
+            name: 'Search Tasks',
             icon: IconCalendar,
-            count: 5
-        },
-        {
-            id: 'upcoming',
-            name: 'Upcoming',
-            icon: IconCalendarUp,
-            count: 12
         },
         {
             id: 'tag-management',
