@@ -1,0 +1,464 @@
+{
+  "info": {
+    "_postman_id": "b4c85a2d-9e12-4f7f-9f31-79f5e4b0c3d8",
+    "name": "Task Manager API - Auth",
+    "description": "Postman-колекція для авторизаційного блоку Task Manager.\n\nЦя колекція описує два публічні ендпоінти:\n- POST {{base_url}}/api/auth/login\n- POST {{base_url}}/api/auth/refresh\n\n`base_url` вказує на корінь домену, а префікс `/api` додається у самому шляху запиту.\n\nУсі успішні відповіді цього контролера повертаються через `Response::json()` у форматі `status` + `data`.\n\nВажливі деталі для прикладів:\n- `login` повертає і `access`, і `refresh` токени;\n- `refresh` повертає лише новий `access` token і актуального `user`;\n- `expiresAt` передається у мілісекундах;\n- `avatar` може бути `null` або абсолютним URL;\n- `refreshToken` у базі зберігається як SHA-256 хеш, тому в документації показано сирий токен, який користувач отримує після `login`.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": 41723412
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"ivan.petrenko@example.com\",\n  \"password\": \"StrongPass123!\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ]
+            },
+            "description": "Авторизація користувача за email і паролем.\n\nЩо перевіряє бекенд:\n- чи передані `email` і `password`;\n- чи існує користувач із таким email;\n- чи збігається пароль після `password_verify($password . $salt, $hash)`;\n- чи потрібно створити новий refresh token для поточного `User-Agent`.\n\nЩо важливо показати в прикладах:\n- успішна відповідь повертає і `access`, і `refresh` токени;\n- `access.token` є JWT, який фронтенд кладе в `Authorization: Bearer ...`;\n- `refresh.token` треба зберегти окремо, бо саме його використовує `POST /api/auth/refresh`;\n- `avatar` у користувача може бути `null`, якщо фото ще не завантажене;\n- помилки обмежуються двома сценаріями: `422` для порожнього body і `401` для неправильних облікових даних."
+          },
+          "response": [
+            {
+              "name": "Success (200 OK)",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"ivan.petrenko@example.com\",\n  \"password\": \"StrongPass123!\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/auth/login",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "auth",
+                    "login"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"status\": \"success\",\n  \"data\": {\n    \"access\": {\n      \"token\": \"eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiI2ZDY4N2M2My1mNzQ1LTRmNjQtYjQxYy1iYzI5ODQ0OWY0ZTkiLCJleHAiOjE3NzAwMDAwMDB9.signature\",\n      \"expiresAt\": 1770000900000\n    },\n    \"refresh\": {\n      \"token\": \"3f7a6c9e1b4d8f203f7a6c9e1b4d8f203f7a6c9e1b4d8f203f7a6c9e1b4d8f203f7a6c9e1b4d8f203f7a6c9e1b4d8f203f7a6c9e1b4d8f203f7a6c9e1b4d8f20\",\n      \"expiresAt\": 1772592900000\n    },\n    \"user\": {\n      \"id\": \"6d687c63-f745-4f64-b41c-bc298449f4e9\",\n      \"name\": \"Іван\",\n      \"surname\": \"Петренко\",\n      \"email\": \"ivan.petrenko@example.com\",\n      \"avatar\": null\n    }\n  }\n}"
+            },
+            {
+              "name": "Validation error (422)",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"\",\n  \"password\": \"\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/auth/login",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "auth",
+                    "login"
+                  ]
+                }
+              },
+              "status": "Unprocessable Entity",
+              "code": 422,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"status\": \"error\",\n  \"data\": {\n    \"message\": \"Email and password required\"\n  }\n}"
+            },
+            {
+              "name": "Authentication error (401)",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"ivan.petrenko@example.com\",\n  \"password\": \"wrong-password\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/auth/login",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "auth",
+                    "login"
+                  ]
+                }
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"status\": \"error\",\n  \"data\": {\n    \"message\": \"Incorrect email or password\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Refresh",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"3f7a6c9e1b4d8f203f7a6c9e1b4d8f203f7a6c9e1b4d8f203f7a6c9e1b4d8f203f7a6c9e1b4d8f203f7a6c9e1b4d8f203f7a6c9e1b4d8f203f7a6c9e1b4d8f20\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/refresh",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "refresh"
+              ]
+            },
+            "description": "Оновлення access token за refresh token.\n\nЩо робить бекенд:\n- очікує `refreshToken` у JSON body;\n- хешує токен через SHA-256;\n- шукає запис у `user_refresh_tokens`;\n- якщо запису немає, повертає `INVALID_TOKEN`;\n- якщо строк дії минув, видаляє запис і повертає `Refresh token is expired`;\n- якщо токен валідний, повертає новий `access` token і актуальні дані користувача.\n\nЩо важливо в прикладах:\n- цей endpoint не повертає новий refresh token;\n- у Postman токен треба вставити вручну з відповіді `login`;\n- помилки мають два різні 401-сценарії: невалідний токен і прострочений токен."
+          },
+          "response": [
+            {
+              "name": "Success (200 OK)",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"refreshToken\": \"3f7a6c9e1b4d8f203f7a6c9e1b4d8f203f7a6c9e1b4d8f203f7a6c9e1b4d8f203f7a6c9e1b4d8f203f7a6c9e1b4d8f203f7a6c9e1b4d8f203f7a6c9e1b4d8f20\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/auth/refresh",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "auth",
+                    "refresh"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"status\": \"success\",\n  \"data\": {\n    \"access\": {\n      \"token\": \"eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiI2ZDY4N2M2My1mNzQ1LTRmNjQtYjQxYy1iYzI5ODQ0OWY0ZTkiLCJleHAiOjE3NzAwMDAwMDB9.signature\",\n      \"expiresAt\": 1770000900000\n    },\n    \"user\": {\n      \"id\": \"6d687c63-f745-4f64-b41c-bc298449f4e9\",\n      \"name\": \"Іван\",\n      \"surname\": \"Петренко\",\n      \"email\": \"ivan.petrenko@example.com\",\n      \"avatar\": null\n    }\n  }\n}"
+            },
+            {
+              "name": "Validation error (422)",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"refreshToken\": \"\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/auth/refresh",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "auth",
+                    "refresh"
+                  ]
+                }
+              },
+              "status": "Unprocessable Entity",
+              "code": 422,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"status\": \"error\",\n  \"data\": {\n    \"message\": \"Refresh token is required\"\n  }\n}"
+            },
+            {
+              "name": "Invalid token (401)",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"refreshToken\": \"tampered-or-unknown-refresh-token\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/auth/refresh",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "auth",
+                    "refresh"
+                  ]
+                }
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"status\": \"error\",\n  \"data\": {\n    \"error\": \"INVALID_TOKEN\"\n  }\n}"
+            },
+            {
+              "name": "Expired token (401)",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"refreshToken\": \"expired-refresh-token-example\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/auth/refresh",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "auth",
+                    "refresh"
+                  ]
+                }
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"status\": \"error\",\n  \"data\": {\n    \"message\": \"Refresh token is expired\"\n  }\n}"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://backend-kurswork.local"
+    }
+  ]
+}
